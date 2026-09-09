@@ -73,17 +73,18 @@
       </li>
     </ul>
   </nz-sider>
-  <!-- Fixed Header -->
-  <nz-header [class.collapsed-header]="isCollapsed">
-    <div class="app-header">
-      <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
-        <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></span>
-      </span>
-    </div>
-  </nz-header>
-
   <!-- Main Layout (Fluid Content Width) -->
   <nz-layout class="main-layout" [class.collapsed-layout]="isCollapsed">
+    <!-- Fixed Header -->
+    <nz-header [class.collapsed-header]="isCollapsed">
+      <div class="app-header">
+        <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+          <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></span>
+        </span>
+        <span class="header-title">{{ pageTitle }}</span>
+      </div>
+    </nz-header>
+
     <nz-content>
       <div class="inner-content">
         <router-outlet></router-outlet>

@@ -8,6 +8,34 @@ import { registerLocaleData } from '@angular/common';
 import uk from '@angular/common/locales/uk';
 
 import { uk_UA, NZ_I18N } from 'ng-zorro-antd/i18n';
+import { NZ_ICONS } from 'ng-zorro-antd/icon';
+import { IconDefinition } from '@ant-design/icons-angular';
+import {
+  ArrowLeftOutline,
+  CalendarOutline,
+  CarryOutOutline,
+  CheckOutline,
+  DashboardOutline,
+  DeleteOutline,
+  DollarOutline,
+  DragOutline,
+  EditOutline,
+  EyeOutline,
+  FileTextOutline,
+  FileWordOutline,
+  ImportOutline,
+  InboxOutline,
+  LinkOutline,
+  LogoutOutline,
+  MedicineBoxOutline,
+  MenuFoldOutline,
+  MenuUnfoldOutline,
+  PlusOutline,
+  RedoOutline,
+  SearchOutline,
+  TeamOutline,
+  UploadOutline,
+} from '@ant-design/icons-angular/icons';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -27,6 +55,36 @@ import { LayoutComponent } from './core/layout/layout.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 registerLocaleData(uk);
+
+// Registered statically so icons resolve offline; NG-ZORRO otherwise fetches
+// each SVG over HTTP, which 404s here and breaks the PWA offline case.
+// Add an entry here whenever a new nzType is used in a template.
+const icons: IconDefinition[] = [
+  ArrowLeftOutline,
+  CalendarOutline,
+  CarryOutOutline,
+  CheckOutline,
+  DashboardOutline,
+  DeleteOutline,
+  DollarOutline,
+  DragOutline,
+  EditOutline,
+  EyeOutline,
+  FileTextOutline,
+  FileWordOutline,
+  ImportOutline,
+  InboxOutline,
+  LinkOutline,
+  LogoutOutline,
+  MedicineBoxOutline,
+  MenuFoldOutline,
+  MenuUnfoldOutline,
+  PlusOutline,
+  RedoOutline,
+  SearchOutline,
+  TeamOutline,
+  UploadOutline,
+];
 
 @NgModule({
   declarations: [AppComponent, LoginComponent, LayoutComponent],
@@ -57,6 +115,7 @@ registerLocaleData(uk);
     { provide: NZ_I18N, useValue: uk_UA },
     { provide: LOCALE_ID, useValue: 'uk-UA' },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: NZ_ICONS, useValue: icons },
   ],
   bootstrap: [AppComponent],
 })
