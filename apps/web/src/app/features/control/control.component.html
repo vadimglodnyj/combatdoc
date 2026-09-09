@@ -1,0 +1,109 @@
+<div class="control-container">
+  <h1>Контроль пацієнтів</h1>
+
+  <nz-tabset>
+    <nz-tab nzTitle="Стаціонар">
+      <div class="tab-content">
+        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="Поранені">
+      <div class="tab-content">
+        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="Поліклініка">
+      <div class="tab-content">
+        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="ВЛК">
+      <div class="tab-content">
+        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="Довготривале">
+      <div class="tab-content">
+        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="Нагадування">
+      <div class="tab-content">
+        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+      </div>
+    </nz-tab>
+
+    <nz-tab nzTitle="Довідки №5">
+      <div class="tab-content">
+        <nz-alert
+          nzType="warning"
+          nzMessage="COMBAT епізоди без верифікованої довідки №5"
+          nzDescription="Для цих епізодів необхідно завантажити та підтвердити довідку про поранення. Виплати заблоковані до верифікації."
+          nzShowIcon
+          [nzCloseable]="false"
+          class="mb-3"
+        ></nz-alert>
+
+        <nz-spin [nzSpinning]="loading">
+          <nz-empty
+            *ngIf="missingCerts.length === 0"
+            nzNotFoundContent="Всі COMBAT епізоди мають верифіковані довідки"
+          ></nz-empty>
+
+          <nz-table
+            *ngIf="missingCerts.length > 0"
+            [nzData]="missingCerts"
+            [nzPageSize]="50"
+            nzSize="middle"
+          >
+            <thead>
+              <tr>
+                <th>Військовослужбовець</th>
+                <th>Звання</th>
+                <th>Діагноз</th>
+                <th>Дата початку</th>
+                <th>Днів</th>
+                <th>Статус довідки</th>
+                <th>Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let episode of missingCerts">
+                <td>
+                  <a [routerLink]="['/members', episode.serviceMemberId]">
+                    {{ episode.serviceMember?.lastName }}
+                    {{ episode.serviceMember?.firstName }}
+                    {{ episode.serviceMember?.middleName }}
+                  </a>
+                </td>
+                <td>{{ episode.serviceMember?.rank?.name || '—' }}</td>
+                <td>{{ episode.diagnosis }}</td>
+                <td>{{ formatDate(episode.startDate) }}</td>
+                <td>
+                  <nz-tag [nzColor]="getDaysSinceStart(episode) > 30 ? 'red' : 'default'">
+                    {{ getDaysSinceStart(episode) }}
+                  </nz-tag>
+                </td>
+                <td>
+                  <nz-tag
+                    [nzColor]="getCertStatusColor(episode.injuryCertificate?.status)"
+                  >
+                    {{ getCertStatusLabel(episode.injuryCertificate?.status) }}
+                  </nz-tag>
+                </td>
+                <td>
+                  <a (click)="viewEpisode(episode)">Переглянути</a>
+                </td>
+              </tr>
+            </tbody>
+          </nz-table>
+        </nz-spin>
+      </div>
+    </nz-tab>
+  </nz-tabset>
+</div>

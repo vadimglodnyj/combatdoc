@@ -267,7 +267,80 @@ pnpm build
 - Поліклінічний список на дату
 - Webhook/токени тільки в секретах
 
-## Що НЕ робимо в цьому етапі (iteration 0)
+---
+
+## ✅ Iteration 2: Episodes + Довідка №5 (DONE)
+
+### Функціонал
+
+#### API
+- **Episodes CRUD**: створення, перегляд, редагування, закриття, повторне відкриття
+- **Query filters**: `serviceMemberId`, `nature` (COMBAT/SOMATIC), `isActive`, `missingCert`
+- **InjuryCertificate**: завантаження файлів (PDF/JPG/PNG), status transitions
+- **Статуси довідки**: `MISSING` → `PENDING` (після upload) → `VERIFIED`/`REJECTED` (медик)
+- **Auto-створення** cert зі статусом `MISSING` для COMBAT епізодів
+- **Journal entries**: логування змін епізоду та сертифіката
+- **Task creation**: автоматичні задачі при REJECTED/MISSING статусі
+- **Payment блокування**: `paymentBlockedByCert` flag для контролю виплат
+
+#### UI (Angular)
+- **Member detail → Episodes tab**: 
+  - Список епізодів з badges (nature, status, cert)
+  - Create modal (діагноз, nature, дата)
+  - Warning для COMBAT (довідка обов'язкова)
+- **Episode detail page** (`/episodes/:id`):
+  - Header з тегами nature/active/cert status
+  - Actions: close/reopen
+  - Certificate card: upload PDF/фото, change status (VERIFIED/REJECTED)
+  - Consultations/segments placeholders
+- **Control → Довідки №5 tab**:
+  - Таблиця COMBAT епізодів без VERIFIED cert
+  - Фільтри та статистика
+  - Лінки на episode detail
+
+#### Seed Data
+- 2 demo service members
+- 1 COMBAT episode (Коваленко) з MISSING cert
+- 1 SOMATIC episode (Шевченко) закритий
+
+### Як випробувати
+
+```bash
+# 1. Seed база даних
+cd apps/api
+pnpm db:seed
+
+# 2. Запустити сервери
+cd ../..
+pnpm dev
+
+# 3. Увійти
+# URL: http://localhost:4200
+# Логін: admin@combatdoc.local / admin123
+
+# 4. Перейти до картки Коваленка
+# Особовий склад → Коваленко Іван Петрович
+
+# 5. Episodes tab → бачимо COMBAT епізод з червоним badge MISSING
+
+# 6. Натиснути "Переглянути" → Episode detail page
+
+# 7. Завантажити файл (PDF/JPG/PNG < 10MB) → статус PENDING
+
+# 8. Змінити статус → VERIFIED або REJECTED (з причиною)
+
+# 9. Control → Довідки №5 → таблиця COMBAT без верифікації
+```
+
+### Технічні деталі
+- Файли зберігаються в `UPLOAD_PATH` (env або `./uploads/injury-certs`)
+- OCR/ML класифікація — placeholder (Gemini integration TODO)
+- Routes: `/episodes/:id`, `/control` (tab "Довідки №5")
+- NG-ZORRO components: Upload, Alert, Modal, Popconfirm, Radio
+
+---
+
+## Що НЕ робимо в MVP
 
 - ❌ ЄСОЗ інтеграція
 - ❌ Аптека

@@ -1,0 +1,227 @@
+<div class="episode-detail-container" *ngIf="episode">
+  <div class="detail-header">
+    <button nz-button nzType="link" (click)="goBack()">
+      <span nz-icon nzType="arrow-left"></span>
+      Назад до картки
+    </button>
+
+    <nz-space class="header-actions">
+      <button
+        *ngIf="episode.isActive"
+        nz-button
+        nzType="default"
+        nz-popconfirm
+        nzPopconfirmTitle="Закрити цей епізод?"
+        (nzOnConfirm)="closeEpisode()"
+      >
+        <span nz-icon nzType="check"></span>
+        Закрити епізод
+      </button>
+      <button
+        *ngIf="!episode.isActive"
+        nz-button
+        nzType="primary"
+        (click)="reopenEpisode()"
+      >
+        <span nz-icon nzType="redo"></span>
+        Відкрити повторно
+      </button>
+    </nz-space>
+  </div>
+
+  <nz-card class="episode-card">
+    <div class="episode-header">
+      <div class="episode-info">
+        <h2 class="episode-title">{{ episode.diagnosis }}</h2>
+        <div class="episode-meta">
+          <nz-tag [nzColor]="getNatureColor(episode.nature)">
+            {{ getNatureLabel(episode.nature) }}
+          </nz-tag>
+          <nz-tag [nzColor]="getActiveColor(episode.isActive)">
+            {{ getActiveLabel(episode.isActive) }}
+          </nz-tag>
+          <nz-tag
+            *ngIf="episode.nature === 'COMBAT' && episode.injuryCertificate"
+            [nzColor]="getCertStatusColor(episode.injuryCertificate.status)"
+          >
+            Довідка №5: {{ getCertStatusLabel(episode.injuryCertificate.status) }}
+          </nz-tag>
+          <nz-tag *ngIf="episode.paymentBlockedByCert" nzColor="red">
+            ⚠️ Виплати заблоковано
+          </nz-tag>
+        </div>
+      </div>
+    </div>
+
+    <nz-descriptions nzBordered [nzColumn]="3">
+      <nz-descriptions-item nzTitle="Військовослужбовець" [nzSpan]="3">
+        <a [routerLink]="['/members', episode.serviceMemberId]">
+          {{ episode.serviceMember?.lastName }}
+          {{ episode.serviceMember?.firstName }}
+          {{ episode.serviceMember?.middleName }}
+        </a>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Звання">
+        {{ episode.serviceMember?.rank?.name || '—' }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Підрозділ" [nzSpan]="2">
+        {{ episode.serviceMember?.unit?.name || '—' }}
+        <span *ngIf="episode.serviceMember?.unitShortName">
+          ({{ episode.serviceMember?.unitShortName }})
+        </span>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Дата початку">
+        {{ formatDate(episode.startDate) }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Дата завершення" [nzSpan]="2">
+        {{ formatDate(episode.endDate) }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="120-денний лічильник">
+        {{ episode.continuousDays120 }} днів
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Консультації">
+        {{ episode.consultations?.length || 0 }}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Сегменти лікування">
+        {{ episode.careSegments?.length || 0 }}
+      </nz-descriptions-item>
+    </nz-descriptions>
+  </nz-card>
+
+  <!-- Injury Certificate Card (COMBAT only) -->
+  <nz-card *ngIf="episode.nature === 'COMBAT'" class="cert-card" nzTitle="Довідка №5">
+    <nz-alert
+      *ngIf="!episode.injuryCertificate || episode.injuryCertificate.status === 'MISSING'"
+      nzType="error"
+      nzMessage="Довідка №5 відсутня"
+      nzDescription="Для бойових епізодів обов'язкова довідка про поранення. Завантажте PDF або фото документу."
+      nzShowIcon
+      [nzCloseable]="false"
+      class="mb-3"
+    ></nz-alert>
+
+    <nz-alert
+      *ngIf="episode.injuryCertificate?.status === 'PENDING'"
+      nzType="warning"
+      nzMessage="Довідка на перевірці"
+      nzDescription="Документ завантажено та очікує підтвердження медичним персоналом."
+      nzShowIcon
+      [nzCloseable]="false"
+      class="mb-3"
+    ></nz-alert>
+
+    <nz-alert
+      *ngIf="episode.injuryCertificate?.status === 'VERIFIED'"
+      nzType="success"
+      nzMessage="Довідка підтверджена"
+      [nzDescription]="
+        'Підтверджено: ' + formatDate(episode.injuryCertificate?.verifiedDate)
+      "
+      nzShowIcon
+      [nzCloseable]="false"
+      class="mb-3"
+    ></nz-alert>
+
+    <nz-alert
+      *ngIf="episode.injuryCertificate?.status === 'REJECTED'"
+      nzType="error"
+      nzMessage="Довідка відхилена"
+      [nzDescription]="episode.injuryCertificate?.rejectionReason || 'Немає причини'"
+      nzShowIcon
+      [nzCloseable]="false"
+      class="mb-3"
+    ></nz-alert>
+
+    <div class="cert-actions">
+      <nz-upload
+        [nzBeforeUpload]="beforeUpload"
+        [nzShowUploadList]="false"
+        nzAccept="application/pdf,image/jpeg,image/jpg,image/png"
+      >
+        <button nz-button nzType="primary" [nzLoading]="uploadLoading">
+          <span nz-icon nzType="upload"></span>
+          {{ episode.injuryCertificate?.filePath ? 'Перезавантажити' : 'Завантажити' }}
+          довідку
+        </button>
+      </nz-upload>
+
+      <button
+        *ngIf="
+          episode.injuryCertificate?.status === 'PENDING' ||
+          episode.injuryCertificate?.status === 'VERIFIED' ||
+          episode.injuryCertificate?.status === 'REJECTED'
+        "
+        nz-button
+        nzType="default"
+        (click)="openStatusModal()"
+      >
+        <span nz-icon nzType="edit"></span>
+        Змінити статус
+      </button>
+    </div>
+
+    <div *ngIf="episode.injuryCertificate?.filePath" class="cert-info">
+      <nz-divider></nz-divider>
+      <p>
+        <strong>Файл:</strong>
+        <nz-tag nzColor="blue">{{ getFileName() }}</nz-tag>
+      </p>
+      <p *ngIf="episode.injuryCertificate?.uploadDate">
+        <strong>Дата завантаження:</strong> {{ formatDate(episode.injuryCertificate?.uploadDate) }}
+      </p>
+    </div>
+  </nz-card>
+
+  <!-- Consultations placeholder -->
+  <nz-card class="consultations-card" nzTitle="Консультації">
+    <nz-empty nzNotFoundContent="Немає консультацій"></nz-empty>
+  </nz-card>
+
+  <!-- Care Segments placeholder -->
+  <nz-card class="segments-card" nzTitle="Сегменти лікування">
+    <nz-empty nzNotFoundContent="Немає сегментів"></nz-empty>
+  </nz-card>
+</div>
+
+<nz-spin *ngIf="loading" nzSimple nzSize="large"></nz-spin>
+
+<!-- Certificate Status Modal -->
+<nz-modal
+  [(nzVisible)]="statusModalVisible"
+  nzTitle="Змінити статус довідки №5"
+  [nzFooter]="statusModalFooter"
+  (nzOnCancel)="closeStatusModal()"
+  nzWidth="500px"
+>
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Новий статус</nz-form-label>
+        <nz-form-control>
+          <nz-radio-group [(ngModel)]="selectedStatus" name="status">
+            <label nz-radio nzValue="VERIFIED">Підтверджено</label>
+            <label nz-radio nzValue="REJECTED">Відхилено</label>
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item *ngIf="selectedStatus === 'REJECTED'">
+        <nz-form-label nzRequired>Причина відхилення</nz-form-label>
+        <nz-form-control>
+          <textarea
+            nz-input
+            [(ngModel)]="rejectionReason"
+            name="rejectionReason"
+            rows="3"
+            placeholder="Вкажіть причину відхилення довідки"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+
+  <ng-template #statusModalFooter>
+    <button nz-button nzType="default" (click)="closeStatusModal()">Скасувати</button>
+    <button nz-button nzType="primary" (click)="updateCertStatus()">Зберегти</button>
+  </ng-template>
+</nz-modal>
