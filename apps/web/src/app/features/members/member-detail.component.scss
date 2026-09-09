@@ -38,6 +38,16 @@
     .tab-content {
       padding: 16px 0;
       min-height: 300px;
+
+      .tab-header {
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+
+    .mt-2 {
+      margin-top: 8px;
     }
   }
 }

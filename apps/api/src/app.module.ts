@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ServiceMembersModule } from './service-members/service-members.module';
 import { DictionariesModule } from './dictionaries/dictionaries.module';
 import { EpisodesModule } from './episodes/episodes.module';
+import { InjuryCertificatesModule } from './injury-certificates/injury-certificates.module';
 import { ConsultationsModule } from './consultations/consultations.module';
 import { CareSegmentsModule } from './care-segments/care-segments.module';
 import { VlkModule } from './vlk/vlk.module';
@@ -28,6 +29,7 @@ import { ControlModule } from './control/control.module';
     ServiceMembersModule,
     DictionariesModule,
     EpisodesModule,
+    InjuryCertificatesModule,
     ConsultationsModule,
     CareSegmentsModule,
     VlkModule,

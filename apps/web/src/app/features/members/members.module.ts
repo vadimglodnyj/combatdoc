@@ -26,6 +26,7 @@ import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
 
 import { MembersListComponent } from './members-list.component';
 import { MemberDetailComponent } from './member-detail.component';
@@ -66,6 +67,7 @@ const routes: Routes = [
     NzInputNumberModule,
     NzSpinModule,
     NzEmptyModule,
+    NzRadioModule,
   ],
 })
 export class MembersModule {}

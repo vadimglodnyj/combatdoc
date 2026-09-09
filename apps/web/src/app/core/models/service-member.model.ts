@@ -15,11 +15,46 @@ export interface Unit {
 
 export interface Episode {
   id: string;
+  serviceMemberId: string;
+  diagnosis: string;
+  startDate: string;
+  endDate?: string;
+  nature: 'COMBAT' | 'SOMATIC';
+  isActive: boolean;
+  continuousDays120: number;
+  serviceMember?: ServiceMember;
+  injuryCertificate?: InjuryCertificate;
+  consultations?: any[];
+  careSegments?: any[];
+  paymentBlockedByCert?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InjuryCertificate {
+  id: string;
+  episodeId: string;
+  status: 'MISSING' | 'PENDING' | 'VERIFIED' | 'REJECTED';
+  uploadDate?: string;
+  verifiedDate?: string;
+  rejectionReason?: string;
+  filePath?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEpisodeDto {
+  serviceMemberId: string;
   nature: 'COMBAT' | 'SOMATIC';
   diagnosis: string;
   startDate: string;
   endDate?: string;
-  isActive: boolean;
+}
+
+export interface UpdateEpisodeDto {
+  diagnosis?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface ServiceMember {

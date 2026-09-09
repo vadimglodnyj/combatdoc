@@ -90,24 +90,38 @@
     <nz-tabset [(nzSelectedIndex)]="selectedTab">
       <nz-tab nzTitle="Епізоди">
         <div class="tab-content">
-          <nz-empty
-            *ngIf="!member.episodes || member.episodes.length === 0"
-            nzNotFoundContent="Немає епізодів лікування"
-          ></nz-empty>
+          <div class="tab-header">
+            <button nz-button nzType="primary" (click)="openEpisodeModal()">
+              <span nz-icon nzType="plus"></span>
+              Створити епізод
+            </button>
+          </div>
 
-          <nz-list
-            *ngIf="member.episodes && member.episodes.length > 0"
-            [nzDataSource]="member.episodes"
+          <nz-spin [nzSpinning]="episodesLoading">
+            <nz-empty
+              *ngIf="episodes.length === 0"
+              nzNotFoundContent="Немає епізодів лікування"
+            ></nz-empty>
+
+            <nz-list
+              *ngIf="episodes.length > 0"
+            [nzDataSource]="episodes"
             [nzRenderItem]="episodeTemplate"
           >
             <ng-template #episodeTemplate let-episode>
-              <nz-list-item>
+              <nz-list-item [nzActions]="[viewAction]">
                 <nz-card [nzTitle]="episode.diagnosis">
                   <nz-tag [nzColor]="getNatureColor(episode.nature)">
                     {{ getNatureLabel(episode.nature) }}
                   </nz-tag>
                   <nz-tag [nzColor]="getActiveColor(episode.isActive)">
                     {{ getActiveLabel(episode.isActive) }}
+                  </nz-tag>
+                  <nz-tag
+                    *ngIf="episode.nature === 'COMBAT' && episode.injuryCertificate"
+                    [nzColor]="getCertStatusColor(episode.injuryCertificate.status)"
+                  >
+                    Довідка №5: {{ getCertStatusLabel(episode.injuryCertificate.status) }}
                   </nz-tag>
                   <p>
                     <strong>Початок:</strong> {{ formatDate(episode.startDate) }}
@@ -116,9 +130,13 @@
                     <strong>Завершення:</strong> {{ formatDate(episode.endDate) }}
                   </p>
                 </nz-card>
+                <ng-template #viewAction>
+                  <a (click)="viewEpisode(episode)">Переглянути</a>
+                </ng-template>
               </nz-list-item>
             </ng-template>
           </nz-list>
+          </nz-spin>
         </div>
       </nz-tab>
 
@@ -150,3 +168,72 @@
 </div>
 
 <nz-spin *ngIf="loading" nzSimple nzSize="large"></nz-spin>
+
+<!-- Create Episode Modal -->
+<nz-modal
+  [(nzVisible)]="episodeModalVisible"
+  nzTitle="Створити епізод"
+  [nzFooter]="episodeModalFooter"
+  (nzOnCancel)="closeEpisodeModal()"
+  nzWidth="600px"
+>
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Характер епізоду</nz-form-label>
+        <nz-form-control>
+          <nz-radio-group [(ngModel)]="episodeForm.nature" name="nature">
+            <label nz-radio nzValue="SOMATIC">Небойовий (SOMATIC)</label>
+            <label nz-radio nzValue="COMBAT">Бойовий (COMBAT)</label>
+          </nz-radio-group>
+          <nz-alert
+            *ngIf="episodeForm.nature === 'COMBAT'"
+            nzType="warning"
+            nzMessage="Для бойових епізодів обов'язкова довідка №5"
+            nzShowIcon
+            [nzCloseable]="false"
+            class="mt-2"
+          ></nz-alert>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Діагноз</nz-form-label>
+        <nz-form-control>
+          <textarea
+            nz-input
+            [(ngModel)]="episodeForm.diagnosis"
+            name="diagnosis"
+            rows="3"
+            placeholder="Введіть діагноз"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>Дата початку</nz-form-label>
+        <nz-form-control>
+          <nz-date-picker
+            [(ngModel)]="episodeForm.startDate"
+            name="startDate"
+            nzFormat="dd.MM.yyyy"
+            nzPlaceHolder="Оберіть дату"
+            style="width: 100%"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+
+  <ng-template #episodeModalFooter>
+    <button nz-button nzType="default" (click)="closeEpisodeModal()">Скасувати</button>
+    <button
+      nz-button
+      nzType="primary"
+      (click)="saveEpisode()"
+      [disabled]="!episodeForm.diagnosis"
+    >
+      Створити
+    </button>
+  </ng-template>
+</nz-modal>
