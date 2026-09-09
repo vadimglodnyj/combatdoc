@@ -1,0 +1,12 @@
+export const CONTINUOUS_DAYS_LIMIT = 120;
+
+export const CARE_TYPES_COUNTING_TOWARD_120 = [
+  'HOSP',
+  'AMB',
+  'VLK_LEAVE',
+  'REHAB',
+];
+
+export const VLK_LEAVE_DURATION_SUGGESTIONS = [30, 60, 120];
+
+export const WHATSAPP_CHAT_1_TYPES = ['AMB', 'HOSP', 'VLK_LEAVE', 'MPBR'];

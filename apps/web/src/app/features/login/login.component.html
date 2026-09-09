@@ -1,0 +1,33 @@
+<div class="login-container">
+  <nz-card class="login-card" [nzTitle]="'Вхід до CombatDOC'">
+    <form nz-form [formGroup]="loginForm" (ngSubmit)="submitForm()">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzRequired>Email</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Введіть коректний email">
+          <input nz-input formControlName="email" placeholder="admin@combatdoc.local" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="24" nzRequired>Пароль</nz-form-label>
+        <nz-form-control [nzSpan]="24" nzErrorTip="Мінімум 6 символів">
+          <input nz-input type="password" formControlName="password" placeholder="Пароль" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <button nz-button nzType="primary" nzBlock [nzLoading]="loading" [disabled]="loading">
+        Увійти
+      </button>
+    </form>
+
+    <div class="login-info">
+      <p><strong>Початкові облікові дані:</strong></p>
+      <p>Email: admin@combatdoc.local</p>
+      <p>Пароль: admin123</p>
+    </div>
+  </nz-card>
+</div>
