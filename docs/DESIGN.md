@@ -42,10 +42,11 @@ This rich purple color is applied as the primary/accent color throughout the app
 ### Implementation
 
 **Theme configuration location**:
-- `apps/web/src/styles.scss` — Global styles with purple primary color variable
-- `apps/web/src/theme.less` — Ant Design Less variables override (if build supports Less)
+- `apps/web/src/styles.scss` — Global styles with Inter font import, purple primary color, NG-ZORRO component font inheritance
+- `apps/web/src/theme.less` — Ant Design Less variables override (Inter font-family + golden purple)
 - `apps/web/src/app/app.module.ts` — NZ_CONFIG provider for NG-ZORRO theme
 - `apps/web/src/app/core/layout/layout.component.scss` — Layout positioning (fixed header/sidebar)
+- `apps/web/package.json` — `@fontsource-variable/inter` dependency (self-hosted, no Google Fonts runtime)
 
 **Key CSS classes**:
 - `.menu-sidebar` — Fixed left sidebar with overflow scroll
@@ -64,8 +65,13 @@ This rich purple color is applied as the primary/accent color throughout the app
 
 ### Typography & Spacing
 
-Following Ant Design defaults:
-- Font family: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial`
+**Font**: Inter (variable font, self-hosted via `@fontsource-variable/inter`)
+- Excellent Ukrainian Cyrillic support
+- Weights: 400–700 (variable font includes full range)
+- Fallbacks: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`
+- Features: ligatures (`liga`) and contextual alternates (`calt`) enabled
+
+**Spacing**:
 - Base font size: 14px
 - Header height: 64px
 - Sidebar width: 250px (expanded), 80px (collapsed)

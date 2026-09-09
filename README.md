@@ -29,6 +29,7 @@ combatdoc/
 | Локалізація | Українська (uk_UA) |
 | **UI Theme** | **Ant Design Pro Golden Purple (`#722ED1`)** |
 | **Layout** | **Fixed Header + Fixed Sidebar + Fluid Content** |
+| **Typography** | **Inter (variable font, Ukrainian Cyrillic)** |
 
 ## Швидкий старт
 
@@ -88,6 +89,7 @@ CombatDOC використовує **Ant Design Pro** стилістику з **
 - **Layout**: Classic Side Menu (фіксований сайдбар зліва + фіксований header зверху)
 - **Content Width**: Fluid (на всю ширину)
 - **Primary Color**: Golden Purple `#722ED1` (кнопки, активні пункти меню, лінки, акценти)
+- **Typography**: Inter variable font (самохостінг через `@fontsource-variable/inter`, підтримка української кирилиці)
 - **Background**: Світлі корпоративні поверхні (білі картки на `#f0f2f5` фоні)
 
 Детальніше про дизайн-систему та responsive patterns — у `docs/DESIGN.md`.
