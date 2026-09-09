@@ -1,0 +1,64 @@
+.import-container {
+  max-width: 1400px;
+  margin: 0 auto;
+
+  h1 {
+    margin-bottom: 24px;
+  }
+
+  .instruction-alert,
+  .preview-alert,
+  .result-alert {
+    margin-bottom: 16px;
+  }
+
+  .selection-controls {
+    margin: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    .overwrite-switch {
+      margin-left: auto;
+    }
+  }
+
+  .preview-table {
+    margin-top: 16px;
+
+    .error-row {
+      background-color: #fff2e8;
+    }
+
+    .error-messages,
+    .warning-messages {
+      margin-top: 4px;
+
+      small {
+        display: block;
+        line-height: 1.4;
+      }
+    }
+
+    .error-text {
+      color: #ff4d4f;
+    }
+
+    .warning-text {
+      color: #faad14;
+    }
+  }
+
+  .action-buttons {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .result-actions {
+    margin-top: 24px;
+  }
+}

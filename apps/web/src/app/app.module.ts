@@ -17,6 +17,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -47,6 +49,8 @@ registerLocaleData(uk);
     NzCardModule,
     NzTableModule,
     NzTagModule,
+    NzMessageModule,
+    NzSpinModule,
   ],
   providers: [
     { provide: NZ_I18N, useValue: uk_UA },
