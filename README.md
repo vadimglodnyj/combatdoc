@@ -80,6 +80,27 @@ Email: admin@combatdoc.local
 
 ⚠️ **Змініть пароль після першого входу!**
 
+### Якщо `EADDRINUSE: address already in use :::3000`
+
+Порт 3000 зайнятий попереднім API (часто після `nest --watch` на Windows). Angular завжди на **4200**.
+
+Dev-режим сам звільняє порт, якщо його тримає старий Node-процес. Якщо помилка лишилась:
+
+```bat
+REM Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+```bash
+# Linux / macOS
+lsof -ti :3000 | xargs kill -9
+# або
+pnpm api:free-port
+```
+
+Потім знову `pnpm dev`. Інший порт API: `PORT=3001` у `apps/api/.env` і той самий URL у `apps/web/src/environments/environment.ts`.
+
 ## UI Theme & Design System
 
 CombatDOC використовує **Ant Design Pro** стилістику з **Golden Purple** (`#722ED1`) як основним кольором.

@@ -4,7 +4,8 @@
   "description": "CombatDOC API (NestJS)",
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch",
+    "predev": "node ../../scripts/free-port.cjs",
+    "dev": "nest start --watch --preserveWatchOutput",
     "start": "node dist/main",
     "start:prod": "node dist/main",
     "db:migrate": "prisma migrate dev",

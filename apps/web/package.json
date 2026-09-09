@@ -2,9 +2,9 @@
   "name": "web",
   "version": "0.1.0",
   "scripts": {
-    "dev": "ng serve",
+    "dev": "ng serve --port 4200 --host localhost",
     "build": "ng build",
-    "start": "ng serve",
+    "start": "ng serve --port 4200 --host localhost",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
