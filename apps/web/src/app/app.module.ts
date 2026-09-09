@@ -55,6 +55,14 @@ registerLocaleData(uk);
   providers: [
     { provide: NZ_I18N, useValue: uk_UA },
     { provide: LOCALE_ID, useValue: 'uk-UA' },
+    {
+      provide: 'NZ_CONFIG',
+      useValue: {
+        theme: {
+          primaryColor: '#722ED1', // Golden Purple (Ant Design Pro)
+        },
+      },
+    },
   ],
   bootstrap: [AppComponent],
 })

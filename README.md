@@ -27,6 +27,8 @@ combatdoc/
 | Аутентифікація | JWT (ролі: ADMIN, DOCTOR) |
 | Monorepo | pnpm workspaces |
 | Локалізація | Українська (uk_UA) |
+| **UI Theme** | **Ant Design Pro Golden Purple (`#722ED1`)** |
+| **Layout** | **Fixed Header + Fixed Sidebar + Fluid Content** |
 
 ## Швидкий старт
 
@@ -76,6 +78,24 @@ Email: admin@combatdoc.local
 ```
 
 ⚠️ **Змініть пароль після першого входу!**
+
+## UI Theme & Design System
+
+CombatDOC використовує **Ant Design Pro** стилістику з **Golden Purple** (`#722ED1`) як основним кольором.
+
+### Конфігурація теми
+
+- **Layout**: Classic Side Menu (фіксований сайдбар зліва + фіксований header зверху)
+- **Content Width**: Fluid (на всю ширину)
+- **Primary Color**: Golden Purple `#722ED1` (кнопки, активні пункти меню, лінки, акценти)
+- **Background**: Світлі корпоративні поверхні (білі картки на `#f0f2f5` фоні)
+
+Детальніше про дизайн-систему та responsive patterns — у `docs/DESIGN.md`.
+
+### Responsive поведінка
+
+- **Desktop (≥768px)**: Бічне меню + таблиці з фільтрами
+- **Mobile (<768px)**: Drawer меню + картки замість таблиць
 
 ## Структура модулів
 

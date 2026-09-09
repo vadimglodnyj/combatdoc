@@ -1,13 +1,15 @@
 <nz-layout class="app-layout">
+  <!-- Fixed Sidebar (Ant Design Pro Style) -->
   <nz-sider
     class="menu-sidebar"
     nzCollapsible
     nzWidth="250px"
+    [nzCollapsedWidth]="80"
     nzBreakpoint="md"
     [(nzCollapsed)]="isCollapsed"
     [nzTrigger]="null"
   >
-    <div class="sidebar-logo">
+    <div class="sidebar-logo" [class.collapsed]="isCollapsed">
       <h1>{{ isCollapsed ? 'CD' : 'CombatDOC' }}</h1>
     </div>
     <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
@@ -71,14 +73,17 @@
       </li>
     </ul>
   </nz-sider>
-  <nz-layout>
-    <nz-header>
-      <div class="app-header">
-        <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
-          <span class="trigger" nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></span>
-        </span>
-      </div>
-    </nz-header>
+  <!-- Fixed Header -->
+  <nz-header [class.collapsed-header]="isCollapsed">
+    <div class="app-header">
+      <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+        <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></span>
+      </span>
+    </div>
+  </nz-header>
+
+  <!-- Main Layout (Fluid Content Width) -->
+  <nz-layout class="main-layout" [class.collapsed-layout]="isCollapsed">
     <nz-content>
       <div class="inner-content">
         <router-outlet></router-outlet>
