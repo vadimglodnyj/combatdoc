@@ -123,16 +123,25 @@ async function main() {
   console.log('✅ Practitioner roles seeded');
 
   // Seed demo ServiceMembers and Episodes
+  const soldierRank = await prisma.rank.findUnique({ where: { code: 'SOL' } });
+  const sergeantRank = await prisma.rank.findUnique({ where: { code: 'SER' } });
+  const firstUnit = await prisma.unit.findUnique({ where: { code: 'U1' } });
+  const secondUnit = await prisma.unit.findUnique({ where: { code: 'U2' } });
+
+  if (!soldierRank || !sergeantRank || !firstUnit || !secondUnit) {
+    throw new Error('Dictionaries (ranks/units) must be seeded before demo data');
+  }
+
   const demoMembers = [
     {
       lastName: 'Коваленко',
       firstName: 'Іван',
       middleName: 'Петрович',
-      rankId: (await prisma.rank.findFirst({ where: { code: 'SLD' } }))!.id,
-      unitId: (await prisma.unit.findFirst({ where: { code: 'HQ' } }))!.id,
+      rankId: soldierRank.id,
+      unitId: firstUnit.id,
       serviceType: 'CONTRACT',
       fullPosition: 'Стрілець 1 відділення',
-      unitShortName: 'Штаб',
+      unitShortName: firstUnit.shortName,
       birthDate: new Date('1995-03-15'),
       phone: '+380501234567',
     },
@@ -140,11 +149,11 @@ async function main() {
       lastName: 'Шевченко',
       firstName: 'Олексій',
       middleName: 'Миколайович',
-      rankId: (await prisma.rank.findFirst({ where: { code: 'SGT' } }))!.id,
-      unitId: (await prisma.unit.findFirst({ where: { code: 'CO1' } }))!.id,
+      rankId: sergeantRank.id,
+      unitId: secondUnit.id,
       serviceType: 'CONTRACT',
       fullPosition: 'Командир відділення',
-      unitShortName: '1 рота',
+      unitShortName: secondUnit.shortName,
       birthDate: new Date('1992-07-22'),
       phone: '+380502345678',
     },
@@ -152,72 +161,81 @@ async function main() {
 
   const createdMembers = [];
   for (const member of demoMembers) {
-    const created = await prisma.serviceMember.upsert({
-      where: { 
-        rankId_lastName_firstName_middleName: {
-          rankId: member.rankId,
-          lastName: member.lastName,
-          firstName: member.firstName,
-          middleName: member.middleName || '',
-        }
+    // ServiceMember has no unique constraint on ПІБ, so match manually to keep seed idempotent
+    const existing = await prisma.serviceMember.findFirst({
+      where: {
+        lastName: member.lastName,
+        firstName: member.firstName,
+        middleName: member.middleName,
       },
-      update: {},
-      create: member,
     });
-    createdMembers.push(created);
+
+    createdMembers.push(existing ?? (await prisma.serviceMember.create({ data: member })));
   }
 
   console.log('✅ Demo service members seeded');
 
-  // Create demo episodes
-  const combatEpisode = await prisma.episode.create({
-    data: {
-      serviceMemberId: createdMembers[0].id,
-      nature: 'COMBAT',
-      diagnosis: 'Осколкове поранення м\'яких тканин правого стегна',
-      startDate: new Date('2024-09-01'),
-      isActive: true,
-    },
+  const combatDiagnosis = 'Осколкове поранення м\'яких тканин правого стегна';
+  const existingCombat = await prisma.episode.findFirst({
+    where: { serviceMemberId: createdMembers[0].id, diagnosis: combatDiagnosis },
   });
 
-  // Create missing certificate for COMBAT episode
-  await prisma.injuryCertificate.create({
-    data: {
-      episodeId: combatEpisode.id,
-      status: 'MISSING',
-    },
-  });
+  if (!existingCombat) {
+    const combatEpisode = await prisma.episode.create({
+      data: {
+        serviceMemberId: createdMembers[0].id,
+        nature: 'COMBAT',
+        diagnosis: combatDiagnosis,
+        startDate: new Date('2024-09-01'),
+        isActive: true,
+      },
+    });
 
-  const somaticEpisode = await prisma.episode.create({
-    data: {
-      serviceMemberId: createdMembers[1].id,
-      nature: 'SOMATIC',
-      diagnosis: 'Гострий бронхіт',
-      startDate: new Date('2024-08-20'),
-      endDate: new Date('2024-09-05'),
-      isActive: false,
-    },
-  });
+    await prisma.injuryCertificate.create({
+      data: {
+        episodeId: combatEpisode.id,
+        status: 'MISSING',
+      },
+    });
 
-  // Journal entries
-  await prisma.journalEntry.createMany({
-    data: [
-      {
+    await prisma.journalEntry.create({
+      data: {
         type: 'CLINICAL',
         patientId: createdMembers[0].id,
         episodeId: combatEpisode.id,
         userId: admin.id,
         action: `Створено бойовий епізод: ${combatEpisode.diagnosis}`,
       },
-      {
+    });
+  }
+
+  const somaticDiagnosis = 'Гострий бронхіт';
+  const existingSomatic = await prisma.episode.findFirst({
+    where: { serviceMemberId: createdMembers[1].id, diagnosis: somaticDiagnosis },
+  });
+
+  if (!existingSomatic) {
+    const somaticEpisode = await prisma.episode.create({
+      data: {
+        serviceMemberId: createdMembers[1].id,
+        nature: 'SOMATIC',
+        diagnosis: somaticDiagnosis,
+        startDate: new Date('2024-08-20'),
+        endDate: new Date('2024-09-05'),
+        isActive: false,
+      },
+    });
+
+    await prisma.journalEntry.create({
+      data: {
         type: 'CLINICAL',
         patientId: createdMembers[1].id,
         episodeId: somaticEpisode.id,
         userId: admin.id,
         action: `Створено небойовий епізод: ${somaticEpisode.diagnosis}`,
       },
-    ],
-  });
+    });
+  }
 
   console.log('✅ Demo episodes seeded (1 COMBAT with missing cert, 1 SOMATIC closed)');
   console.log('🎉 Seeding completed!');

@@ -39,7 +39,7 @@ export class InjuryCertificatesService {
     return cert;
   }
 
-  async uploadFile(episodeId: string, file: Express.Multer.File) {
+  async uploadFile(episodeId: string, file: Express.Multer.File, userId: string) {
     const episode = await this.prisma.episode.findUnique({
       where: { id: episodeId },
       include: { injuryCertificate: true },
@@ -87,7 +87,7 @@ export class InjuryCertificatesService {
         type: 'CLINICAL',
         patientId: episode.serviceMemberId,
         episodeId,
-        userId: 'system',
+        userId,
         action: `Завантажено довідку №5: ${file.originalname} (статус: PENDING)`,
       },
     });
@@ -98,7 +98,7 @@ export class InjuryCertificatesService {
     return this.findByEpisode(episodeId);
   }
 
-  async updateStatus(episodeId: string, dto: UpdateCertStatusDto) {
+  async updateStatus(episodeId: string, dto: UpdateCertStatusDto, userId: string) {
     const cert = await this.prisma.injuryCertificate.findUnique({
       where: { episodeId },
       include: { episode: true },
@@ -125,7 +125,7 @@ export class InjuryCertificatesService {
         type: 'CLINICAL',
         patientId: cert.episode.serviceMemberId,
         episodeId,
-        userId: 'system',
+        userId,
         action: `Довідка №5: статус змінено на ${dto.status}${dto.rejectionReason ? ` (причина: ${dto.rejectionReason})` : ''}`,
       },
     });
@@ -140,7 +140,7 @@ export class InjuryCertificatesService {
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
           patientId: cert.episode.serviceMemberId,
           assigneeId: null,
-          createdById: 'system',
+          createdById: userId,
         },
       });
     }

@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -21,8 +22,8 @@ export class EpisodesController {
   constructor(private readonly episodesService: EpisodesService) {}
 
   @Post()
-  create(@Body() dto: CreateEpisodeDto) {
-    return this.episodesService.create(dto);
+  create(@Body() dto: CreateEpisodeDto, @Request() req: any) {
+    return this.episodesService.create(dto, req.user.id);
   }
 
   @Get()
@@ -36,22 +37,26 @@ export class EpisodesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateEpisodeDto) {
-    return this.episodesService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateEpisodeDto,
+    @Request() req: any,
+  ) {
+    return this.episodesService.update(id, dto, req.user.id);
   }
 
   @Post(':id/close')
-  close(@Param('id') id: string) {
-    return this.episodesService.close(id);
+  close(@Param('id') id: string, @Request() req: any) {
+    return this.episodesService.close(id, req.user.id);
   }
 
   @Post(':id/reopen')
-  reopen(@Param('id') id: string) {
-    return this.episodesService.reopen(id);
+  reopen(@Param('id') id: string, @Request() req: any) {
+    return this.episodesService.reopen(id, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.episodesService.remove(id);
+  remove(@Param('id') id: string, @Request() req: any) {
+    return this.episodesService.remove(id, req.user.id);
   }
 }

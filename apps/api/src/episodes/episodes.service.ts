@@ -8,7 +8,7 @@ import { ListEpisodesQueryDto } from './dto/list-episodes-query.dto';
 export class EpisodesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateEpisodeDto) {
+  async create(dto: CreateEpisodeDto, userId: string) {
     const member = await this.prisma.serviceMember.findUnique({
       where: { id: dto.serviceMemberId },
     });
@@ -53,7 +53,7 @@ export class EpisodesService {
         type: 'CLINICAL',
         patientId: dto.serviceMemberId,
         episodeId: episode.id,
-        userId: 'system', // TODO: get from auth context
+        userId,
         action: `Створено епізод: ${dto.nature} - ${dto.diagnosis}`,
       },
     });
@@ -149,7 +149,7 @@ export class EpisodesService {
     return this.enrichEpisode(episode);
   }
 
-  async update(id: string, dto: UpdateEpisodeDto) {
+  async update(id: string, dto: UpdateEpisodeDto, userId: string) {
     const episode = await this.findOne(id);
 
     const updated = await this.prisma.episode.update({
@@ -167,7 +167,7 @@ export class EpisodesService {
         type: 'CLINICAL',
         patientId: episode.serviceMemberId,
         episodeId: id,
-        userId: 'system',
+        userId,
         action: `Оновлено епізод: ${dto.diagnosis || episode.diagnosis}`,
       },
     });
@@ -175,7 +175,7 @@ export class EpisodesService {
     return this.findOne(id);
   }
 
-  async close(id: string) {
+  async close(id: string, userId: string) {
     const episode = await this.findOne(id);
 
     if (!episode.isActive) {
@@ -195,7 +195,7 @@ export class EpisodesService {
         type: 'CLINICAL',
         patientId: episode.serviceMemberId,
         episodeId: id,
-        userId: 'system',
+        userId,
         action: `Закрито епізод: ${episode.diagnosis}`,
       },
     });
@@ -203,7 +203,7 @@ export class EpisodesService {
     return this.findOne(id);
   }
 
-  async reopen(id: string) {
+  async reopen(id: string, userId: string) {
     const episode = await this.findOne(id);
 
     if (episode.isActive) {
@@ -223,7 +223,7 @@ export class EpisodesService {
         type: 'CLINICAL',
         patientId: episode.serviceMemberId,
         episodeId: id,
-        userId: 'system',
+        userId,
         action: `Відкрито повторно епізод: ${episode.diagnosis}`,
       },
     });
@@ -231,7 +231,7 @@ export class EpisodesService {
     return this.findOne(id);
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
     const episode = await this.findOne(id);
 
     await this.prisma.episode.delete({
@@ -242,7 +242,7 @@ export class EpisodesService {
       data: {
         type: 'CLINICAL',
         patientId: episode.serviceMemberId,
-        userId: 'system',
+        userId,
         action: `Видалено епізод: ${episode.diagnosis}`,
       },
     });

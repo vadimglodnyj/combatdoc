@@ -1,7 +1,7 @@
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
@@ -24,6 +24,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './features/login/login.component';
 import { LayoutComponent } from './core/layout/layout.component';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 registerLocaleData(uk);
 
@@ -55,14 +56,7 @@ registerLocaleData(uk);
   providers: [
     { provide: NZ_I18N, useValue: uk_UA },
     { provide: LOCALE_ID, useValue: 'uk-UA' },
-    {
-      provide: 'NZ_CONFIG',
-      useValue: {
-        theme: {
-          primaryColor: '#722ED1', // Golden Purple (Ant Design Pro)
-        },
-      },
-    },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
 })

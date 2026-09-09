@@ -9,8 +9,8 @@ coverage/
 .angular/
 apps/api/prisma/*.db
 
-# Prisma
-apps/api/prisma/migrations/
+# Uploaded injury certificates and other runtime files must never be committed
+apps/api/uploads/
 
 # Angular
 apps/web/.angular/

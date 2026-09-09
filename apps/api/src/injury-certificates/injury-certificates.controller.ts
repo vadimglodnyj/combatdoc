@@ -5,9 +5,11 @@ import {
   Patch,
   Param,
   Body,
+  Request,
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -29,16 +31,22 @@ export class InjuryCertificatesController {
   uploadFile(
     @Param('episodeId') episodeId: string,
     @UploadedFile() file: Express.Multer.File,
+    @Request() req: any,
   ) {
-    return this.certService.uploadFile(episodeId, file);
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    return this.certService.uploadFile(episodeId, file, req.user.id);
   }
 
   @Patch('episode/:episodeId/status')
   updateStatus(
     @Param('episodeId') episodeId: string,
     @Body() dto: UpdateCertStatusDto,
+    @Request() req: any,
   ) {
-    return this.certService.updateStatus(episodeId, dto);
+    return this.certService.updateStatus(episodeId, dto, req.user.id);
   }
 
   @Get('missing')
