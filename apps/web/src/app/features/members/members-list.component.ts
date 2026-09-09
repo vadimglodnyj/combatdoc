@@ -41,7 +41,11 @@ export class MembersListComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading members:', err);
-        this.message.error('Помилка завантаження даних');
+        if (err?.status === 401) {
+          this.message.warning('Потрібен вхід. Використовуйте admin@combatdoc.local / admin123');
+        } else {
+          this.message.error('Помилка завантаження даних');
+        }
         this.loading = false;
       },
     });

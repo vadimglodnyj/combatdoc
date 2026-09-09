@@ -53,6 +53,7 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './features/login/login.component';
 import { LayoutComponent } from './core/layout/layout.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { environment } from '../environments/environment';
 
 registerLocaleData(uk);
 
@@ -96,7 +97,7 @@ const icons: IconDefinition[] = [
     ReactiveFormsModule,
     AppRoutingModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: true,
+      enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000',
     }),
     NzLayoutModule,
