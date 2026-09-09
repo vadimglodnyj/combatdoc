@@ -8,3 +8,23 @@ build/
 coverage/
 .angular/
 apps/api/prisma/*.db
+
+# Prisma
+apps/api/prisma/migrations/
+
+# Angular
+apps/web/.angular/
+apps/web/dist/
+
+# Build artifacts
+*.tsbuildinfo
+out-tsc/
+
+# PWA
+apps/web/src/ngsw-worker.js
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

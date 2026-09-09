@@ -19,7 +19,7 @@ export class HealthController {
         status: 'error',
         timestamp: new Date().toISOString(),
         database: 'disconnected',
-        error: error.message,
+        error: (error as Error).message || 'Unknown error',
       };
     }
   }

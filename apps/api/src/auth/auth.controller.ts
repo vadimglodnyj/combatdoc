@@ -18,7 +18,7 @@ export class AuthController {
   @Post('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  async createUser(@Body() createUserDto: CreateUserDto, @Request() req) {
+  async createUser(@Body() createUserDto: CreateUserDto, @Request() req: any) {
     return this.authService.createUser(createUserDto, req.user.id);
   }
 }

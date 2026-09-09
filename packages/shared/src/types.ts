@@ -6,7 +6,6 @@ import {
   ConsultationStatus,
   InjuryCertificateStatus,
   TaskStatus,
-  JournalEntryType,
 } from './enums';
 
 export interface CreateUserDto {
