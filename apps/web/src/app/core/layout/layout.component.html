@@ -1,0 +1,94 @@
+<nz-layout class="app-layout">
+  <!-- Fixed Sidebar (Ant Design Pro Style) -->
+  <nz-sider
+    class="menu-sidebar"
+    nzCollapsible
+    nzWidth="250px"
+    [nzCollapsedWidth]="80"
+    nzBreakpoint="md"
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+  >
+    <div class="sidebar-logo" [class.collapsed]="isCollapsed">
+      <h1>{{ isCollapsed ? 'CD' : 'CombatDOC' }}</h1>
+    </div>
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/members">
+          <span nz-icon nzType="team"></span>
+          <span>Військовослужбовці</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/episodes">
+          <span nz-icon nzType="file-text"></span>
+          <span>Епізоди</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/consultations">
+          <span nz-icon nzType="medicine-box"></span>
+          <span>Консультації</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/segments">
+          <span nz-icon nzType="calendar"></span>
+          <span>Сегменти</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/control">
+          <span nz-icon nzType="dashboard"></span>
+          <span>Контроль</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/tasks">
+          <span nz-icon nzType="carry-out"></span>
+          <span>Задачі</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/documents">
+          <span nz-icon nzType="file-word"></span>
+          <span>Документи</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/payments">
+          <span nz-icon nzType="dollar"></span>
+          <span>Оплата</span>
+        </a>
+      </li>
+      <li nz-menu-item nzMatchRouter>
+        <a routerLink="/import">
+          <span nz-icon nzType="import"></span>
+          <span>Імпорт</span>
+        </a>
+      </li>
+      <li nz-menu-item (click)="logout()">
+        <span nz-icon nzType="logout"></span>
+        <span>Вихід</span>
+      </li>
+    </ul>
+  </nz-sider>
+  <!-- Main Layout (Fluid Content Width) -->
+  <nz-layout class="main-layout" [class.collapsed-layout]="isCollapsed">
+    <!-- Fixed Header -->
+    <nz-header [class.collapsed-header]="isCollapsed">
+      <div class="app-header">
+        <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+          <span nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"></span>
+        </span>
+        <span class="header-title">{{ pageTitle }}</span>
+      </div>
+    </nz-header>
+
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

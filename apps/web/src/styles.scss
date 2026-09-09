@@ -1,0 +1,71 @@
+// NG-ZORRO Ant Design styles (REQUIRED)
+@import 'ng-zorro-antd/ng-zorro-antd.min.css';
+
+// Inter variable font (Ukrainian Cyrillic support)
+@import '@fontsource-variable/inter';
+
+// Ant Design Pro Golden Purple Theme
+$primary-color: #722ed1; // Golden Purple
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  background: #f0f2f5;
+  font-feature-settings: 'liga' 1, 'calt' 1; // Enable ligatures and contextual alternates
+}
+
+.ant-layout {
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+// Enterprise light surfaces with purple accents
+.ant-btn-primary {
+  background-color: $primary-color;
+  border-color: $primary-color;
+
+  &:hover,
+  &:focus {
+    background-color: lighten($primary-color, 10%);
+    border-color: lighten($primary-color, 10%);
+  }
+}
+
+a {
+  color: $primary-color;
+
+  &:hover {
+    color: lighten($primary-color, 10%);
+  }
+}
+
+.ant-menu-item-selected {
+  color: $primary-color !important;
+}
+
+// Apply Inter globally to all NG-ZORRO components
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-table,
+.ant-menu,
+.ant-form,
+.ant-card,
+.ant-descriptions,
+.ant-list,
+.ant-tag,
+.ant-badge,
+.ant-alert,
+.ant-message,
+.ant-notification {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

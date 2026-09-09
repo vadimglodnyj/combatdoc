@@ -1,0 +1,315 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(DOCTOR)
+  fullName  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  journalEntries JournalEntry[]
+  tasksCreated   Task[]         @relation("TaskCreator")
+  tasksAssigned  Task[]         @relation("TaskAssignee")
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+}
+
+model ServiceMember {
+  id                    String    @id @default(cuid())
+  lastName              String
+  firstName             String
+  middleName            String
+  rankId                String
+  unitId                String
+  serviceType           String
+  fullPosition          String
+  unitShortName         String?
+  birthDate             DateTime?
+  phone                 String?
+  taxId                 String?
+  recruitmentOffice     String?
+  recruitmentDate       DateTime?
+  educationLevel        String?
+  educationInstitution  String?
+  educationPlace        String?
+  educationYear         Int?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  rank     Rank @relation(fields: [rankId], references: [id])
+  unit     Unit @relation(fields: [unitId], references: [id])
+  episodes Episode[]
+
+  @@map("service_members")
+}
+
+model Episode {
+  id                 String         @id @default(cuid())
+  serviceMemberId    String
+  nature             EpisodeNature
+  diagnosis          String
+  startDate          DateTime
+  endDate            DateTime?
+  isActive           Boolean        @default(true)
+  continuousDays120  Int            @default(0)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  serviceMember       ServiceMember        @relation(fields: [serviceMemberId], references: [id], onDelete: Cascade)
+  consultations       Consultation[]
+  careSegments        CareSegment[]
+  injuryCertificate   InjuryCertificate?
+  vlkDecisions        VlkDecision[]
+  journalEntries      JournalEntry[]
+
+  @@map("episodes")
+}
+
+enum EpisodeNature {
+  COMBAT
+  SOMATIC
+}
+
+model Consultation {
+  id                 String              @id @default(cuid())
+  episodeId          String
+  kind               ConsultationKind
+  status             ConsultationStatus  @default(PLANNED)
+  facilityId         String
+  practitionerRoleId String
+  scheduledDate      DateTime?
+  completedDate      DateTime?
+  notes              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  episode          Episode          @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  facility         Facility         @relation(fields: [facilityId], references: [id])
+  practitionerRole PractitionerRole @relation(fields: [practitionerRoleId], references: [id])
+
+  @@map("consultations")
+}
+
+enum ConsultationKind {
+  VISIT
+  EXAM
+}
+
+enum ConsultationStatus {
+  PLANNED
+  DONE
+  CANCELLED
+}
+
+model CareSegment {
+  id             String          @id @default(cuid())
+  episodeId      String
+  type           CareSegmentType
+  dateFrom       DateTime
+  dateTo         DateTime?
+  facilityId     String
+  documentNumber String?
+  diagnosis      String?
+  notes          String?
+  whatsappStatus String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  episode  Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  facility Facility @relation(fields: [facilityId], references: [id])
+
+  @@map("care_segments")
+}
+
+enum CareSegmentType {
+  HOSP
+  DAY
+  AMB
+  MPBR
+  REHAB
+  ABROAD
+  PHYS
+  VLK_LEAVE
+}
+
+model InjuryCertificate {
+  id              String                     @id @default(cuid())
+  episodeId       String                     @unique
+  status          InjuryCertificateStatus    @default(MISSING)
+  uploadDate      DateTime?
+  verifiedDate    DateTime?
+  rejectionReason String?
+  filePath        String?
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@map("injury_certificates")
+}
+
+enum InjuryCertificateStatus {
+  MISSING
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model VlkDecision {
+  id               String    @id @default(cuid())
+  episodeId        String
+  decisionDate     DateTime
+  decisionType     String
+  durationDays     Int?
+  followUpRequired Boolean   @default(false)
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@map("vlk_decisions")
+}
+
+model JournalEntry {
+  id         String           @id @default(cuid())
+  type       JournalEntryType
+  action     String
+  patientId  String?
+  episodeId  String?
+  userId     String
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+
+  episode Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id])
+
+  @@map("journal_entries")
+}
+
+enum JournalEntryType {
+  CLINICAL
+  SYSTEM
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  patientId   String?
+  assigneeId  String?
+  createdById String
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  assignee  User? @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdBy User  @relation("TaskCreator", fields: [createdById], references: [id])
+
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  DOING
+  DONE
+}
+
+model TeamMember {
+  id          String   @id @default(cuid())
+  name        String
+  discordId   String?  @unique
+  syncId      String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+model PaymentPeriod {
+  id              String    @id @default(cuid())
+  serviceMemberId String
+  startDate       DateTime
+  endDate         DateTime
+  amount          Decimal?
+  isPaid          Boolean   @default(false)
+  paidDate        DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("payment_periods")
+}
+
+model Rank {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  name       String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  serviceMembers ServiceMember[]
+
+  @@map("ranks")
+}
+
+model Unit {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  name       String
+  shortName  String?
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  serviceMembers ServiceMember[]
+
+  @@map("units")
+}
+
+model Facility {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  shortName    String?
+  address      String?
+  popularity   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  consultations Consultation[]
+  careSegments  CareSegment[]
+
+  @@map("facilities")
+}
+
+model PractitionerRole {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  name         String
+  popularity   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  consultations Consultation[]
+
+  @@map("practitioner_roles")
+}
