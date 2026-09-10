@@ -41,7 +41,7 @@
           nzPlaceHolder="Оберіть підрозділ"
           (ngModelChange)="onUnitChange($event)"
         >
-          <nz-option *ngFor="let unit of units" [nzValue]="unit.id" [nzLabel]="unit.name"></nz-option>
+          <nz-option *ngFor="let unit of units" [nzValue]="unit.id" [nzLabel]="formatUnitOption(unit)"></nz-option>
         </nz-select>
       </nz-form-control>
     </nz-form-item>

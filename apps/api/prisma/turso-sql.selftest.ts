@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { parseDump } from './turso-sql';
+import { extractUnitLabel } from './turso-units';
 
 const sample = `
 CREATE TABLE patients (
@@ -24,4 +25,11 @@ assert.equal(dump.tables.patients.rows.length, 1);
 assert.equal(dump.tables.patients.rows[0].pib, 'Тестовий Іван Петрович');
 assert.equal(dump.tables.treatments.rows[0].title, 'Гострий бронхіт');
 assert.equal(dump.tables.treatments.rows[0].patient_id, 1);
+assert.equal(
+  extractUnitLabel({
+    unitShort: String(dump.tables.patients.rows[0].unit_short),
+    rank: String(dump.tables.patients.rows[0].rank),
+  }),
+  '1',
+);
 console.log('turso-sql parse tests passed');

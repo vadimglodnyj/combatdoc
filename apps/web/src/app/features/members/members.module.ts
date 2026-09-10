@@ -21,6 +21,7 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 import { MembersListComponent } from './members-list.component';
 import { MemberDetailComponent } from './member-detail.component';
@@ -56,6 +57,7 @@ const routes: Routes = [
     NzSpinModule,
     NzEmptyModule,
     NzRadioModule,
+    NzPaginationModule,
   ],
 })
 export class MembersModule {}

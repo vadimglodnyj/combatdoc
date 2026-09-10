@@ -70,12 +70,7 @@
       </div>
       <div class="field">
         <dt class="field__label">Підрозділ</dt>
-        <dd class="field__value">
-          {{ episode.serviceMember?.unit?.name || '—' }}
-          <span *ngIf="episode.serviceMember?.unitShortName">
-            ({{ episode.serviceMember?.unitShortName }})
-          </span>
-        </dd>
+        <dd class="field__value">{{ formatUnit() }}</dd>
       </div>
       <div class="field">
         <dt class="field__label">Дата початку</dt>

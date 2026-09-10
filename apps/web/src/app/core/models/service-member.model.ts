@@ -57,6 +57,13 @@ export interface UpdateEpisodeDto {
   endDate?: string;
 }
 
+export interface ServiceMemberPage {
+  items: ServiceMember[];
+  total: number;
+  page: number;
+  take: number;
+}
+
 export interface ServiceMember {
   id: string;
   lastName: string;

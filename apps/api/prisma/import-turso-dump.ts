@@ -2,6 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient, EpisodeNature, CareSegmentType } from '@prisma/client';
 import { parseDump, SqlRow } from './turso-sql';
+import {
+  canReuseUnit,
+  extractUnitLabel,
+  makeUnitCode,
+  normalizeKey,
+  uniqueCode,
+} from './turso-units';
 
 const prisma = new PrismaClient();
 
@@ -53,6 +60,7 @@ type Stats = {
   membersCreated: number;
   membersUpdated: number;
   membersSkipped: number;
+  unitsCreated: number;
   episodesCreated: number;
   episodesSkipped: number;
   certs: number;
@@ -102,14 +110,6 @@ function parseDate(raw: string): Date | null {
   }
   const d = new Date(text);
   return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function normalizeKey(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/['’`]/g, '')
-    .replace(/[^a-zа-яіїєґ0-9]+/gi, ' ')
-    .trim();
 }
 
 function mapCause(raw: string, needsCert: string): EpisodeNature {
@@ -172,7 +172,10 @@ async function main() {
   const visits = (dump.tables.outpatient_entries?.rows || []).filter((row) => !isDeleted(row));
 
   console.log(
-    `Таблиці: patients=${patients.length}, treatments=${treatments.length}, injury_cases=${injuryCases.length}, visits=${visits.length}`,
+    `Таблиці дампу: ${Object.keys(dump.tables).join(', ') || '(немає)'}`,
+  );
+  console.log(
+    `Рядків: patients=${patients.length}, treatments=${treatments.length}, injury_cases=${injuryCases.length}, visits=${visits.length}`,
   );
 
   const admin = await prisma.user.findFirst({
@@ -211,6 +214,7 @@ async function main() {
     membersCreated: 0,
     membersUpdated: 0,
     membersSkipped: 0,
+    unitsCreated: 0,
     episodesCreated: 0,
     episodesSkipped: 0,
     certs: 0,
@@ -231,23 +235,67 @@ async function main() {
     return byName?.id || defaultRank.id;
   }
 
-  function resolveUnitId(unitShort: string, rankUnit: string): { id: string; short?: string } {
-    const blob = `${unitShort} ${rankUnit}`;
-    const num = blob.match(/(?:підр|підрозділ|рота)?\s*([1-6])\b/i);
-    if (num) {
-      const code = `U${num[1]}`;
-      const unit = units.find((u) => u.code === code);
-      if (unit) return { id: unit.id, short: unit.shortName || unitShort || undefined };
+  function labelFromPatient(row: SqlRow): string {
+    return extractUnitLabel({
+      unitName: cell(row, 'unit', 'unit_name', 'pidrozdil', 'subdivision'),
+      unitShort: cell(row, 'unit_short'),
+      rankUnit: cell(row, 'rank_unit'),
+      rank: cell(row, 'rank'),
+    });
+  }
+
+  const usedCodes = new Set(units.map((u) => u.code));
+  const unitByLabel = new Map<string, { id: string; short?: string }>();
+
+  async function ensureUnit(label: string): Promise<{ id: string; short?: string }> {
+    const key = normalizeKey(label);
+    if (!key) return { id: defaultUnit.id };
+    const cached = unitByLabel.get(key);
+    if (cached) return cached;
+
+    const existing = units.find((u) => canReuseUnit(label, u));
+    if (existing) {
+      const mapped = { id: existing.id, short: existing.shortName || label };
+      unitByLabel.set(key, mapped);
+      return mapped;
     }
-    if (/3029/.test(blob)) {
-      const unit = units.find((u) => u.code === 'U3029');
-      if (unit) return { id: unit.id, short: unitShort || unit.shortName || undefined };
+
+    const created = await prisma.unit.create({
+      data: {
+        code: uniqueCode(makeUnitCode(label), usedCodes),
+        name: label,
+        shortName: label.slice(0, 48),
+        sortOrder: 100 + units.length,
+      },
+    });
+    units.push(created);
+    stats.unitsCreated += 1;
+    const mapped = { id: created.id, short: created.shortName || label };
+    unitByLabel.set(key, mapped);
+    return mapped;
+  }
+
+  const dumpUnitLabels = new Map<string, string>();
+  for (const row of patients) {
+    const label = labelFromPatient(row);
+    if (label) dumpUnitLabels.set(normalizeKey(label), label);
+  }
+  console.log(
+    `Унікальні підрозділи з дампу (${dumpUnitLabels.size}): ${[...dumpUnitLabels.values()].sort().join(', ') || '(немає)'}`,
+  );
+  for (const label of dumpUnitLabels.values()) {
+    await ensureUnit(label);
+  }
+
+  const dictTables = ['units', 'unit', 'subunits', 'subdivisions', 'pidrozdily'];
+  for (const name of dictTables) {
+    const table = dump.tables[name];
+    if (!table?.rows?.length) continue;
+    console.log(`Знайдено таблицю ${name} (${table.rows.length} рядків) — імпортую як довідник підрозділів`);
+    for (const row of table.rows) {
+      const label = cell(row, 'name', 'title', 'unit_name', 'label', 'short_name', 'unit_short');
+      if (label) await ensureUnit(label);
     }
-    const byShort = units.find(
-      (u) => u.shortName && normalizeKey(u.shortName) === normalizeKey(unitShort),
-    );
-    if (byShort) return { id: byShort.id, short: unitShort || byShort.shortName || undefined };
-    return { id: defaultUnit.id, short: unitShort || undefined };
   }
 
   for (const row of patients) {
@@ -258,8 +306,8 @@ async function main() {
       continue;
     }
     const oldId = cell(row, 'id', 'sync_id') || pib;
-    const rankRaw = cell(row, 'rank', 'rank_unit');
-    const unitInfo = resolveUnitId(cell(row, 'unit_short'), cell(row, 'rank_unit'));
+    const rankRaw = cell(row, 'rank') || cell(row, 'rank_unit');
+    const unitInfo = await ensureUnit(labelFromPatient(row));
     const data = {
       lastName: parsed.lastName,
       firstName: parsed.firstName,
@@ -267,7 +315,7 @@ async function main() {
       rankId: resolveRankId(rankRaw),
       unitId: unitInfo.id,
       serviceType: mapServiceType(cell(row, 'service_category', 'kategoriia')),
-      fullPosition: cell(row, 'position', 'rank_unit') || '—',
+      fullPosition: cell(row, 'position') || '—',
       unitShortName: unitInfo.short,
       birthDate: parseDate(cell(row, 'birth_date')),
       phone: cell(row, 'phone') || null,
@@ -451,6 +499,11 @@ async function main() {
 
   console.log('🎉 Імпорт завершено (дамп не змінювався і не комітиться):');
   console.log(JSON.stringify(stats, null, 2));
+  if (stats.unitsCreated > 0) {
+    console.log(
+      'Підрозділи створено з полів unit_short / rank_unit дампу, не з сідових «Підрозділ 1–6». Повторіть імпорт, щоб оновити вже завантажені картки.',
+    );
+  }
 }
 
 main()

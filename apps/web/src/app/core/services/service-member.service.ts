@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ServiceMember, CreateServiceMemberDto, ImportPreview } from '../models/service-member.model';
+import {
+  ServiceMember,
+  ServiceMemberPage,
+  CreateServiceMemberDto,
+  ImportPreview,
+} from '../models/service-member.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -12,12 +17,14 @@ export class ServiceMemberService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(search?: string): Observable<ServiceMember[]> {
-    let params = new HttpParams();
+  getAll(search?: string, page = 1, take = 30): Observable<ServiceMemberPage> {
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('take', String(take));
     if (search) {
       params = params.set('search', search);
     }
-    return this.http.get<ServiceMember[]>(this.apiUrl, { params });
+    return this.http.get<ServiceMemberPage>(this.apiUrl, { params });
   }
 
   getOne(id: string): Observable<ServiceMember> {

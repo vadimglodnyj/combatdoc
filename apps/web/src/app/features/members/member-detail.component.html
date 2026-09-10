@@ -31,7 +31,7 @@
         <h1 class="member-name">{{ getFullName() }}</h1>
         <div class="member-meta">
           <nz-tag [nzColor]="'blue'">{{ member.rank?.name }}</nz-tag>
-          <nz-tag>{{ member.unit?.name }}</nz-tag>
+          <nz-tag>{{ formatUnit() }}</nz-tag>
           <nz-tag *ngIf="getActiveEpisodesCount() > 0" nzColor="orange">
             Активні епізоди: {{ getActiveEpisodesCount() }}
           </nz-tag>
@@ -48,10 +48,7 @@
       </div>
       <div class="field">
         <dt class="field__label">Підрозділ</dt>
-        <dd class="field__value">
-          {{ member.unit?.name || '—' }}
-          <span *ngIf="member.unitShortName"> ({{ member.unitShortName }})</span>
-        </dd>
+        <dd class="field__value">{{ formatUnit() }}</dd>
       </div>
       <div class="field">
         <dt class="field__label">Вид служби</dt>

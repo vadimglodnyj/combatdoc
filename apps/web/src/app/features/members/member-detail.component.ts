@@ -8,6 +8,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { MemberFormComponent } from './member-form.component';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { formatUnitLabel } from '../../core/utils/format-unit';
 
 @Component({
   selector: 'app-member-detail',
@@ -98,6 +99,10 @@ export class MemberDetailComponent implements OnInit {
   getFullName(): string {
     if (!this.member) return '';
     return `${this.member.lastName} ${this.member.firstName} ${this.member.middleName}`;
+  }
+
+  formatUnit(): string {
+    return formatUnitLabel(this.member?.unit, this.member?.unitShortName);
   }
 
   formatDate(date?: string): string {

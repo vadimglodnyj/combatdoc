@@ -29,6 +29,8 @@
   <nz-spin [nzSpinning]="loading">
     <nz-empty *ngIf="!loading && members.length === 0" nzNotFoundContent="Немає карток"></nz-empty>
 
+    <p class="list-meta" *ngIf="!loading && total > 0">{{ total }} карток</p>
+
     <div class="tile-stack" *ngIf="members.length > 0">
       <article class="data-tile" *ngFor="let member of members" (click)="viewDetail(member)">
         <div class="data-tile__head">
@@ -69,7 +71,7 @@
           </div>
           <div class="field">
             <dt class="field__label">Підрозділ</dt>
-            <dd class="field__value">{{ member.unit?.shortName || member.unit?.name || '—' }}</dd>
+            <dd class="field__value">{{ formatUnit(member) }}</dd>
           </div>
           <div class="field field--wide">
             <dt class="field__label">Посада</dt>
@@ -83,6 +85,18 @@
           </div>
         </dl>
       </article>
+    </div>
+
+    <div class="list-pager" *ngIf="total > 20">
+      <nz-pagination
+        [nzPageIndex]="page"
+        [nzPageSize]="pageSize"
+        [nzTotal]="total"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[20, 30, 50]"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
     </div>
   </nz-spin>
 </div>

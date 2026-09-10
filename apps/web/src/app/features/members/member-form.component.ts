@@ -5,6 +5,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ServiceMemberService } from '../../core/services/service-member.service';
 import { DictionaryService } from '../../core/services/dictionary.service';
 import { ServiceMember, Rank, Unit } from '../../core/models/service-member.model';
+import { formatUnitLabel } from '../../core/utils/format-unit';
 
 @Component({
   selector: 'app-member-form',
@@ -66,6 +67,10 @@ export class MemberFormComponent implements OnInit {
     this.dictionaryService.getUnits().subscribe((data) => {
       this.units = data;
     });
+  }
+
+  formatUnitOption(unit: Unit): string {
+    return formatUnitLabel(unit);
   }
 
   onUnitChange(unitId: string): void {

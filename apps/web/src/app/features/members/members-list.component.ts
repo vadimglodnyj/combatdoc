@@ -5,6 +5,7 @@ import { ServiceMember } from '../../core/models/service-member.model';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MemberFormComponent } from './member-form.component';
+import { formatUnitLabel } from '../../core/utils/format-unit';
 
 @Component({
   selector: 'app-members-list',
@@ -15,6 +16,9 @@ export class MembersListComponent implements OnInit {
   members: ServiceMember[] = [];
   loading = false;
   searchValue = '';
+  page = 1;
+  pageSize = 30;
+  total = 0;
 
   constructor(
     private serviceMemberService: ServiceMemberService,
@@ -29,9 +33,12 @@ export class MembersListComponent implements OnInit {
 
   loadMembers(): void {
     this.loading = true;
-    this.serviceMemberService.getAll(this.searchValue).subscribe({
+    this.serviceMemberService.getAll(this.searchValue, this.page, this.pageSize).subscribe({
       next: (data) => {
-        this.members = data;
+        this.members = data.items;
+        this.total = data.total;
+        this.page = data.page;
+        this.pageSize = data.take;
         this.loading = false;
       },
       error: (err) => {
@@ -47,7 +54,23 @@ export class MembersListComponent implements OnInit {
   }
 
   onSearch(): void {
+    this.page = 1;
     this.loadMembers();
+  }
+
+  onPageIndexChange(page: number): void {
+    this.page = page;
+    this.loadMembers();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.page = 1;
+    this.loadMembers();
+  }
+
+  formatUnit(member: ServiceMember): string {
+    return formatUnitLabel(member.unit, member.unitShortName);
   }
 
   openCreateModal(): void {

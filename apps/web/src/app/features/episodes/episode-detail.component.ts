@@ -6,6 +6,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { formatUnitLabel } from '../../core/utils/format-unit';
 
 @Component({
   selector: 'app-episode-detail',
@@ -60,6 +61,13 @@ export class EpisodeDetailComponent implements OnInit {
   formatDate(date?: string): string {
     if (!date) return '—';
     return format(new Date(date), 'dd.MM.yyyy', { locale: uk });
+  }
+
+  formatUnit(): string {
+    return formatUnitLabel(
+      this.episode?.serviceMember?.unit,
+      this.episode?.serviceMember?.unitShortName,
+    );
   }
 
   closeEpisode(): void {
