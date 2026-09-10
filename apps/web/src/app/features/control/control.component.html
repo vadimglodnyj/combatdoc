@@ -67,6 +67,7 @@
                 {{ memberName(item.episode?.serviceMember) }}
                 · {{ formatDate(item.scheduledDate) }}
                 · {{ item.facility?.shortName || item.facility?.name || 'без ЛПЗ' }}
+                <span *ngIf="diagnosisOf(item)"> · {{ diagnosisOf(item) }}</span>
               </p>
             </article>
           </div>

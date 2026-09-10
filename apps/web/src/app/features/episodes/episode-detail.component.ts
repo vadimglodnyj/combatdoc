@@ -98,6 +98,7 @@ export class EpisodeDetailComponent implements OnInit {
         facilityId: '',
         practitionerRoleId: '',
         completedDate: this.episode.endDate || this.episode.startDate,
+        diagnosis: this.episode.diagnosis,
         notes: this.episode.diagnosis,
         createdAt: this.episode.createdAt,
         updatedAt: this.episode.updatedAt,
@@ -135,7 +136,11 @@ export class EpisodeDetailComponent implements OnInit {
   }
 
   get hasOpenSegment(): boolean {
-    return this.segments.some((item) => this.isReal(item.id) && !item.dateTo);
+    return this.openSegmentCount > 0;
+  }
+
+  get openSegmentCount(): number {
+    return this.segments.filter((item) => this.isReal(item.id) && !item.dateTo).length;
   }
 
   openConsultationForm(consultation?: Consultation, complete = false): void {
@@ -143,7 +148,7 @@ export class EpisodeDetailComponent implements OnInit {
     const ref = this.modal.create({
       nzTitle: consultation ? (complete ? 'Завершити консультацію' : 'Редагувати консультацію') : 'Нова консультація',
       nzContent: ConsultationFormComponent,
-      nzData: { episodeId: this.episode.id, consultation, complete },
+      nzData: { episodeId: this.episode.id, diagnosis: this.episode.diagnosis, consultation, complete },
       nzFooter: null,
       nzWidth: window.innerWidth < 768 ? '100%' : 640,
     });

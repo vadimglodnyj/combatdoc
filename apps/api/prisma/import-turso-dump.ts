@@ -44,6 +44,7 @@ type Stats = {
   episodesSkipped: number;
   certs: number;
   segments: number;
+  segmentsDeduped: number;
   consultations: number;
   visitsSkipped: number;
   journal: number;
@@ -194,6 +195,7 @@ async function main() {
     episodesSkipped: 0,
     certs: 0,
     segments: 0,
+    segmentsDeduped: 0,
     consultations: 0,
     visitsSkipped: 0,
     journal: 0,
@@ -465,23 +467,44 @@ async function main() {
           facilityId,
           practitionerRoleId: defaultRole.id,
           completedDate: from,
-          notes: [lpz, notes, diagnosis].filter(Boolean).join(' · ') || null,
+          diagnosis,
+          notes: [lpz, notes].filter(Boolean).join(' · ') || null,
         },
       });
       stats.consultations += 1;
     } else if (care !== 'SKIP') {
-      await prisma.careSegment.create({
-        data: {
+      const existingSegment = await prisma.careSegment.findFirst({
+        where: {
           episodeId,
           type: care,
           dateFrom: from,
-          dateTo: to,
           facilityId,
-          diagnosis,
-          notes,
+          dateTo: to,
         },
       });
-      stats.segments += 1;
+      if (existingSegment) {
+        stats.segmentsDeduped += 1;
+      } else {
+        const open = await prisma.careSegment.findFirst({
+          where: { episodeId, dateTo: null },
+        });
+        if (open && !to && open.type === care && open.facilityId === facilityId) {
+          stats.segmentsDeduped += 1;
+        } else {
+          await prisma.careSegment.create({
+            data: {
+              episodeId,
+              type: care,
+              dateFrom: from,
+              dateTo: to,
+              facilityId,
+              diagnosis,
+              notes,
+            },
+          });
+          stats.segments += 1;
+        }
+      }
     }
 
     let memberId = episodeMemberCache.get(episodeId) || episodeMeta.get(episodeId)?.memberId;
@@ -514,10 +537,29 @@ async function main() {
         facilityId: defaultFacility.id,
         practitionerRoleId: defaultRole.id,
         completedDate: meta.startDate,
-        notes: meta.diagnosis,
+        diagnosis: meta.diagnosis,
+        notes: null,
       },
     });
     stats.consultations += 1;
+  }
+
+  const allSegments = await prisma.careSegment.findMany({ orderBy: { createdAt: 'asc' } });
+  const seenKeys = new Set<string>();
+  for (const segment of allSegments) {
+    const key = [
+      segment.episodeId,
+      segment.type,
+      segment.dateFrom.toISOString().slice(0, 10),
+      segment.dateTo ? segment.dateTo.toISOString().slice(0, 10) : 'open',
+      segment.facilityId,
+    ].join('|');
+    if (seenKeys.has(key)) {
+      await prisma.careSegment.delete({ where: { id: segment.id } });
+      stats.segmentsDeduped += 1;
+      continue;
+    }
+    seenKeys.add(key);
   }
 
   console.log('🎉 Імпорт завершено (дамп не змінювався і не комітиться):');
@@ -527,9 +569,9 @@ async function main() {
       'Підрозділи створено з полів unit_short / rank_unit дампу, не з сідових «Підрозділ 1–6». Повторіть імпорт, щоб оновити вже завантажені картки.',
     );
   }
-  if (stats.consultations > 0 || stats.segments > 0) {
+  if (stats.consultations > 0 || stats.segments > 0 || stats.segmentsDeduped > 0) {
     console.log(
-      `Клінічні записи: консультації=${stats.consultations}, сегменти=${stats.segments}, пропущено візитів=${stats.visitsSkipped}.`,
+      `Клінічні записи: консультації=${stats.consultations}, сегменти=${stats.segments}, дублі сегментів прибрано=${stats.segmentsDeduped}, пропущено візитів=${stats.visitsSkipped}.`,
     );
   }
 }

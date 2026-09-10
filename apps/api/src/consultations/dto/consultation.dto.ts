@@ -53,6 +53,10 @@ export class CreateConsultationDto {
 
   @IsOptional()
   @IsString()
+  diagnosis?: string;
+
+  @IsOptional()
+  @IsString()
   notes?: string;
 
   @IsOptional()
@@ -85,6 +89,10 @@ export class UpdateConsultationDto {
   @IsOptional()
   @IsDateString()
   completedDate?: string;
+
+  @IsOptional()
+  @IsString()
+  diagnosis?: string;
 
   @IsOptional()
   @IsString()

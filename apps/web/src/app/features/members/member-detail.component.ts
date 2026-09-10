@@ -13,6 +13,7 @@ import { uk } from 'date-fns/locale';
 import { formatUnitLabel } from '../../core/utils/format-unit';
 import {
   careSegmentLabel,
+  consultationDiagnosis,
   consultationKindLabel,
   consultationStatusColor,
   consultationStatusLabel,
@@ -173,6 +174,7 @@ export class MemberDetailComponent implements OnInit {
         facilityId: '',
         practitionerRoleId: '',
         completedDate: episode.endDate || episode.startDate,
+        diagnosis: episode.diagnosis,
         notes: episode.diagnosis,
         episode,
         createdAt: episode.createdAt,
@@ -209,6 +211,7 @@ export class MemberDetailComponent implements OnInit {
   consultationKindLabel = consultationKindLabel;
   consultationStatusLabel = consultationStatusLabel;
   consultationStatusColor = consultationStatusColor;
+  consultationDiagnosis = consultationDiagnosis;
   careSegmentLabel = careSegmentLabel;
 
   private targetEpisode(): Episode | undefined {
@@ -224,7 +227,7 @@ export class MemberDetailComponent implements OnInit {
     const ref = this.modal.create({
       nzTitle: 'Нова консультація',
       nzContent: ConsultationFormComponent,
-      nzData: { episodeId: episode.id },
+      nzData: { episodeId: episode.id, diagnosis: episode.diagnosis },
       nzFooter: null,
       nzWidth: window.innerWidth < 768 ? '100%' : 640,
     });

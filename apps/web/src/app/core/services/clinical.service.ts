@@ -13,6 +13,7 @@ export interface ConsultationWriteDto {
   scheduledDate?: string;
   completedDate?: string;
   notes?: string;
+  diagnosis?: string;
   outcome?: {
     kind: 'NONE' | 'CONSULTATION' | 'EXAM' | 'CARE_SEGMENT';
     type?: string;

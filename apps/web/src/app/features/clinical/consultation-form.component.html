@@ -58,6 +58,13 @@
     </nz-form-item>
 
     <nz-form-item class="form-grid__wide">
+      <nz-form-label nzRequired>Діагноз</nz-form-label>
+      <nz-form-control nzErrorTip="Вкажіть діагноз">
+        <input nz-input formControlName="diagnosis" placeholder="Діагноз консультації" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-grid__wide">
       <nz-form-label>Примітка</nz-form-label>
       <nz-form-control>
         <textarea nz-input formControlName="notes" rows="2"></textarea>

@@ -6,6 +6,7 @@ import { Consultation } from '../../core/models/service-member.model';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import {
+  consultationDiagnosis,
   consultationKindLabel,
   consultationStatusColor,
   consultationStatusLabel,
@@ -93,4 +94,5 @@ export class ConsultationsListComponent implements OnInit {
   kindLabel = consultationKindLabel;
   statusLabel = consultationStatusLabel;
   statusColor = consultationStatusColor;
+  diagnosisOf = consultationDiagnosis;
 }

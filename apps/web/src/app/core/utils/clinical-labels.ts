@@ -59,6 +59,14 @@ export function consultationStatusColor(status?: string | null): string {
   }
 }
 
+export function consultationDiagnosis(item?: {
+  diagnosis?: string | null;
+  notes?: string | null;
+  episode?: { diagnosis?: string | null } | null;
+} | null): string {
+  return item?.diagnosis || item?.episode?.diagnosis || item?.notes || '';
+}
+
 export function looksLikeConsultationTitle(title?: string | null): boolean {
   return /консультац|огляд|направл|\bмпб\b|referral|consult|exam/i.test(title || '');
 }

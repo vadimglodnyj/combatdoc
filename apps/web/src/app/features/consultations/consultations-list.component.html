@@ -51,11 +51,11 @@
         </div>
         <div class="data-tile__tags">
           <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
-          <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
+          <nz-tag *ngIf="diagnosisOf(item)">{{ diagnosisOf(item) }}</nz-tag>
         </div>
         <p class="data-tile__meta">
           {{ memberName(item) }} · {{ formatDate(item.completedDate || item.scheduledDate) }}
-          <span *ngIf="item.notes"> · {{ item.notes }}</span>
+          <span *ngIf="item.notes && item.notes !== diagnosisOf(item)"> · {{ item.notes }}</span>
         </p>
       </article>
     </div>

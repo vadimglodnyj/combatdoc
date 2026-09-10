@@ -56,6 +56,7 @@ export class ConsultationsService {
     if (search) {
       where.OR = [
         { notes: { contains: search, mode: 'insensitive' } },
+        { diagnosis: { contains: search, mode: 'insensitive' } },
         { episode: { diagnosis: { contains: search, mode: 'insensitive' } } },
         { episode: { serviceMember: { lastName: { contains: search, mode: 'insensitive' } } } },
         { episode: { serviceMember: { firstName: { contains: search, mode: 'insensitive' } } } },
@@ -99,6 +100,7 @@ export class ConsultationsService {
           : status === 'DONE'
             ? new Date()
             : null,
+        diagnosis: dto.diagnosis || episode.diagnosis,
         notes: dto.notes || null,
       },
       include,
@@ -133,6 +135,7 @@ export class ConsultationsService {
         ...(dto.status && { status: dto.status }),
         ...(dto.facilityId && { facilityId: dto.facilityId }),
         ...(dto.practitionerRoleId && { practitionerRoleId: dto.practitionerRoleId }),
+        ...(dto.diagnosis !== undefined && { diagnosis: dto.diagnosis || null }),
         ...(dto.notes !== undefined && { notes: dto.notes || null }),
         ...(dto.scheduledDate !== undefined && {
           scheduledDate: dto.scheduledDate ? new Date(dto.scheduledDate) : null,
@@ -195,7 +198,7 @@ export class ConsultationsService {
       birthDate: member.birthDate,
       phone: member.phone,
       action: item.kind === 'EXAM' ? 'Обстеження' : 'Консультація',
-      diagnosis: item.episode.diagnosis,
+      diagnosis: item.diagnosis || item.episode.diagnosis,
     });
     await this.whatsapp.sendToChat2(text);
     await this.journal(userId, member.id, item.episodeId, 'Подано консультацію в чат 2', {
@@ -218,6 +221,7 @@ export class ConsultationsService {
           facilityId: outcome.facilityId || parent.facilityId,
           practitionerRoleId: outcome.practitionerRoleId || parent.practitionerRoleId,
           scheduledDate: outcome.scheduledDate ? new Date(outcome.scheduledDate) : null,
+          diagnosis: parent.diagnosis || parent.episode.diagnosis,
           notes: outcome.notes || `Наступна дія після ${parent.kind}`,
         },
         include,
@@ -236,7 +240,7 @@ export class ConsultationsService {
           type: outcome.type as CareSegmentType,
           facilityId: outcome.facilityId || parent.facilityId,
           dateFrom: new Date().toISOString().slice(0, 10),
-          diagnosis: parent.episode.diagnosis,
+          diagnosis: parent.diagnosis || parent.episode.diagnosis,
           notes: outcome.notes,
         },
         userId,
@@ -244,7 +248,12 @@ export class ConsultationsService {
     }
   }
 
-  private async notifyPlanned(item: { episode: any; kind: string; scheduledDate: Date | null }) {
+  private async notifyPlanned(item: {
+    episode: any;
+    kind: string;
+    scheduledDate: Date | null;
+    diagnosis?: string | null;
+  }) {
     const member = item.episode.serviceMember;
     const when = item.scheduledDate
       ? item.scheduledDate.toISOString().slice(0, 10)
@@ -252,7 +261,7 @@ export class ConsultationsService {
     const pib = `${member.lastName} ${member.firstName} ${member.middleName}`.trim();
     await this.discord.sendReminder(
       `PLANNED ${item.kind}`,
-      `${pib} · ${item.episode.diagnosis} · ${when}`,
+      `${pib} · ${item.diagnosis || item.episode.diagnosis} · ${when}`,
     );
   }
 

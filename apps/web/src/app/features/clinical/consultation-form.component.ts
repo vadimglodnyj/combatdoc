@@ -10,6 +10,7 @@ import { CARE_SEGMENT_TYPES } from '../../core/utils/clinical-labels';
 
 export interface ConsultationFormData {
   episodeId: string;
+  diagnosis?: string;
   consultation?: Consultation;
   complete?: boolean;
 }
@@ -60,6 +61,10 @@ export class ConsultationFormComponent implements OnInit {
             : null,
       ],
       notes: [this.consultation?.notes || ''],
+      diagnosis: [
+        this.consultation?.diagnosis || this.nzModalData?.diagnosis || '',
+        Validators.required,
+      ],
       outcomeKind: ['NONE'],
       outcomeType: ['HOSP'],
       outcomeScheduledDate: [null],
@@ -87,6 +92,7 @@ export class ConsultationFormComponent implements OnInit {
       practitionerRoleId: value.practitionerRoleId,
       scheduledDate: value.scheduledDate ? format(value.scheduledDate, 'yyyy-MM-dd') : undefined,
       completedDate: value.completedDate ? format(value.completedDate, 'yyyy-MM-dd') : undefined,
+      diagnosis: value.diagnosis || undefined,
       notes: value.notes || undefined,
       outcome:
         value.outcomeKind && value.outcomeKind !== 'NONE'

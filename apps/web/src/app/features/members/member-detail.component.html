@@ -112,6 +112,9 @@
               Створити епізод
             </button>
           </div>
+          <p class="section-hint">
+            Епізод — справа по діагнозу. Усередині нього консультації (візити) і сегменти (стаціонар / поліклініка / ВЛК).
+          </p>
 
           <nz-spin [nzSpinning]="episodesLoading">
             <nz-empty
@@ -190,12 +193,12 @@
                 <nz-tag [nzColor]="consultationStatusColor(item.status)">
                   {{ consultationStatusLabel(item.status) }}
                 </nz-tag>
-                <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
+                <nz-tag *ngIf="consultationDiagnosis(item)">{{ consultationDiagnosis(item) }}</nz-tag>
               </div>
               <p class="data-tile__meta">
                 {{ formatDate(item.completedDate || item.scheduledDate) }}
                 <span *ngIf="item.practitionerRole?.name"> · {{ item.practitionerRole?.name }}</span>
-                <span *ngIf="item.notes"> · {{ item.notes }}</span>
+                <span *ngIf="item.notes && item.notes !== consultationDiagnosis(item)"> · {{ item.notes }}</span>
               </p>
             </article>
           </div>

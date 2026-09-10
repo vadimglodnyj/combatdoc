@@ -192,8 +192,9 @@
           <nz-tag *ngIf="item.practitionerRole?.name">{{ item.practitionerRole?.name }}</nz-tag>
         </div>
         <p class="data-tile__meta">
+          <span *ngIf="item.diagnosis">{{ item.diagnosis }} · </span>
           {{ formatDate(item.completedDate || item.scheduledDate) }}
-          <span *ngIf="item.notes"> · {{ item.notes }}</span>
+          <span *ngIf="item.notes && item.notes !== item.diagnosis"> · {{ item.notes }}</span>
         </p>
         <div class="tile-actions" *ngIf="isReal(item.id)" (click)="$event.stopPropagation()">
           <button *ngIf="item.status === 'PLANNED'" nz-button nzSize="small" (click)="openConsultationForm(item, true)">
@@ -203,7 +204,16 @@
           <button *ngIf="item.status === 'PLANNED'" nz-button nzSize="small" nzDanger (click)="cancelConsultation(item)">
             Скасувати
           </button>
-          <button nz-button nzSize="small" nzType="dashed" (click)="dispatchConsultation(item)">У чат 2</button>
+          <button
+            nz-button
+            nzSize="small"
+            nzType="dashed"
+            nz-popconfirm
+            nzPopconfirmTitle="Подати рядок у WhatsApp-чат командирів (чат 2)? Зараз лише лог API."
+            (nzOnConfirm)="dispatchConsultation(item)"
+          >
+            У чат командирам
+          </button>
         </div>
       </article>
     </div>
@@ -211,6 +221,17 @@
 
   <!-- Care Segments -->
   <nz-card class="segments-card" nzTitle="Сегменти лікування" [nzExtra]="segmentExtra">
+    <p class="section-hint">
+      Епізод — справа по діагнозу. Сегмент — період обліку (стаціонар, поліклініка, відпустка ВЛК), не дубль епізоду.
+      Відкритий сегмент = не в строю. «Подати в чати» шле рядок у WhatsApp: чат 1 (стройова / непрацездатність) і чат 2 (командирам). Поки без живого чату — лише лог API.
+    </p>
+    <nz-alert
+      *ngIf="openSegmentCount > 1"
+      nzType="warning"
+      nzShowIcon
+      nzMessage="Є кілька відкритих сегментів. Залиште один: зайвий закрийте або видаліть після повторного імпорту."
+      class="mb-3"
+    ></nz-alert>
     <ng-template #segmentExtra>
       <button
         nz-button
@@ -248,7 +269,16 @@
           <button *ngIf="!item.dateTo" nz-button nzSize="small" (click)="openSegmentForm('transition', item)">
             Перехід
           </button>
-          <button nz-button nzSize="small" nzType="dashed" (click)="dispatchSegment(item)">У чати</button>
+          <button
+            nz-button
+            nzSize="small"
+            nzType="dashed"
+            nz-popconfirm
+            nzPopconfirmTitle="Подати в WhatsApp: чат 1 (непрацездатність) і чат 2 (командирам)? Зараз лише лог API."
+            (nzOnConfirm)="dispatchSegment(item)"
+          >
+            Подати в чати
+          </button>
         </div>
       </article>
     </div>

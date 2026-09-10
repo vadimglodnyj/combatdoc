@@ -35,6 +35,7 @@ export interface Consultation {
   practitionerRoleId: string;
   scheduledDate?: string;
   completedDate?: string;
+  diagnosis?: string;
   notes?: string;
   facility?: Facility;
   practitionerRole?: PractitionerRole;

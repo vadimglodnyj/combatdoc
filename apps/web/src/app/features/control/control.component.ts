@@ -6,7 +6,7 @@ import { uk } from 'date-fns/locale';
 import { EpisodeService } from '../../core/services/episode.service';
 import { ClinicalService } from '../../core/services/clinical.service';
 import { CareSegment, Consultation, Episode } from '../../core/models/service-member.model';
-import { careSegmentLabel, consultationKindLabel } from '../../core/utils/clinical-labels';
+import { careSegmentLabel, consultationDiagnosis, consultationKindLabel } from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-control',
@@ -179,4 +179,5 @@ export class ControlComponent implements OnInit {
 
   segmentLabel = careSegmentLabel;
   kindLabel = consultationKindLabel;
+  diagnosisOf = consultationDiagnosis;
 }

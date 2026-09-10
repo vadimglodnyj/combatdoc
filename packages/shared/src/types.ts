@@ -71,6 +71,7 @@ export interface ConsultationDto {
   practitionerRoleId: string;
   scheduledDate?: Date;
   completedDate?: Date;
+  diagnosis?: string;
   notes?: string;
 }
 
