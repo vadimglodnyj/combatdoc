@@ -13,6 +13,7 @@ const routes: Routes = [
     path: '',
     component: LayoutComponent,
     canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     children: [
       { path: '', redirectTo: 'members', pathMatch: 'full' },
       {
@@ -64,6 +65,7 @@ const routes: Routes = [
       },
     ],
   },
+  { path: '**', redirectTo: 'login' },
 ];
 
 @NgModule({

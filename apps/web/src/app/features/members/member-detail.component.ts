@@ -2,12 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceMemberService } from '../../core/services/service-member.service';
 import { EpisodeService } from '../../core/services/episode.service';
-import { ServiceMember, Episode, CreateEpisodeDto } from '../../core/models/service-member.model';
+import { ServiceMember, Episode, CreateEpisodeDto, Consultation, CareSegment } from '../../core/models/service-member.model';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { MemberFormComponent } from './member-form.component';
+import { ConsultationFormComponent } from '../clinical/consultation-form.component';
+import { SegmentFormComponent } from '../clinical/segment-form.component';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { formatUnitLabel } from '../../core/utils/format-unit';
+import {
+  careSegmentTitle,
+  consultationDiagnosis,
+  consultationKindLabel,
+  consultationStatusColor,
+  consultationStatusLabel,
+  looksLikeConsultationTitle,
+  segmentTypeFromTitle,
+} from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-member-detail',
@@ -66,7 +78,7 @@ export class MemberDetailComponent implements OnInit {
       nzTitle: 'Редагувати картку',
       nzContent: MemberFormComponent,
       nzData: { member: this.member },
-      nzWidth: 800,
+      nzWidth: window.innerWidth < 768 ? '100%' : 720,
       nzFooter: null,
     });
 
@@ -98,6 +110,10 @@ export class MemberDetailComponent implements OnInit {
   getFullName(): string {
     if (!this.member) return '';
     return `${this.member.lastName} ${this.member.firstName} ${this.member.middleName}`;
+  }
+
+  formatUnit(): string {
+    return formatUnitLabel(this.member?.unit, this.member?.unitShortName);
   }
 
   formatDate(date?: string): string {
@@ -141,9 +157,106 @@ export class MemberDetailComponent implements OnInit {
     return this.episodes.filter((e) => e.isActive).length;
   }
 
+  get memberConsultations(): Consultation[] {
+    const nested = this.episodes.flatMap((episode) =>
+      (episode.consultations || []).map((item) => ({ ...item, episode })),
+    );
+    const synthetic = this.episodes
+      .filter(
+        (episode) =>
+          looksLikeConsultationTitle(episode.diagnosis) && !(episode.consultations || []).length,
+      )
+      .map((episode) => ({
+        id: `from-episode-${episode.id}`,
+        episodeId: episode.id,
+        kind: 'VISIT' as const,
+        status: episode.isActive ? ('PLANNED' as const) : ('DONE' as const),
+        facilityId: '',
+        practitionerRoleId: '',
+        completedDate: episode.endDate || episode.startDate,
+        diagnosis: episode.diagnosis,
+        notes: episode.diagnosis,
+        episode,
+        createdAt: episode.createdAt,
+        updatedAt: episode.updatedAt,
+      }));
+    return [...nested, ...synthetic];
+  }
+
+  get memberSegments(): CareSegment[] {
+    const nested = this.episodes.flatMap((episode) =>
+      (episode.careSegments || []).map((item) => ({ ...item, episode })),
+    );
+    const synthetic: CareSegment[] = [];
+    for (const episode of this.episodes) {
+      if ((episode.careSegments || []).length) continue;
+      const type = segmentTypeFromTitle(episode.diagnosis) as CareSegment['type'] | null;
+      if (!type) continue;
+      synthetic.push({
+        id: `from-episode-${episode.id}`,
+        episodeId: episode.id,
+        type,
+        dateFrom: episode.startDate,
+        dateTo: episode.endDate,
+        facilityId: '',
+        diagnosis: episode.diagnosis,
+        episode,
+        createdAt: episode.createdAt,
+        updatedAt: episode.updatedAt,
+      });
+    }
+    return [...nested, ...synthetic];
+  }
+
+  consultationKindLabel = consultationKindLabel;
+  consultationStatusLabel = consultationStatusLabel;
+  consultationStatusColor = consultationStatusColor;
+  consultationDiagnosis = consultationDiagnosis;
+  careSegmentTitle = careSegmentTitle;
+
+  private targetEpisode(): Episode | undefined {
+    return this.episodes.find((item) => item.isActive) || this.episodes[0];
+  }
+
+  openConsultationForm(): void {
+    const episode = this.targetEpisode();
+    if (!episode) {
+      this.message.warning('Спочатку створіть епізод');
+      return;
+    }
+    const ref = this.modal.create({
+      nzTitle: 'Нова консультація',
+      nzContent: ConsultationFormComponent,
+      nzData: { episodeId: episode.id, diagnosis: episode.diagnosis },
+      nzFooter: null,
+      nzWidth: window.innerWidth < 768 ? '100%' : 640,
+    });
+    ref.afterClose.subscribe((ok) => {
+      if (ok && this.member) this.loadEpisodes(this.member.id);
+    });
+  }
+
+  openSegmentForm(): void {
+    const episode = this.targetEpisode();
+    if (!episode) {
+      this.message.warning('Спочатку створіть епізод');
+      return;
+    }
+    const ref = this.modal.create({
+      nzTitle: 'Відкрити сегмент',
+      nzContent: SegmentFormComponent,
+      nzData: { episodeId: episode.id, diagnosis: episode.diagnosis, mode: 'open' },
+      nzFooter: null,
+      nzWidth: window.innerWidth < 768 ? '100%' : 640,
+    });
+    ref.afterClose.subscribe((ok) => {
+      if (ok && this.member) this.loadEpisodes(this.member.id);
+    });
+  }
+
   loadEpisodes(serviceMemberId: string): void {
     this.episodesLoading = true;
-    this.episodeService.findAll({ serviceMemberId }).subscribe({
+    this.episodeService.findAll({ serviceMemberId, take: 200 }).subscribe({
       next: (response) => {
         this.episodes = response.data;
         this.episodesLoading = false;

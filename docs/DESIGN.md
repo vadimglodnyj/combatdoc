@@ -95,16 +95,14 @@ Inspired by Ant Design Pro:
 ## Feature-Specific Patterns
 
 ### Service Members (Особовий склад)
-- **List View**: 
-  - Desktop: `nz-table` with filters, sortable columns
-  - Mobile: `nz-list` with card tiles (PIB title, rank/status tags, key fields)
-- **Detail Page**: Profile-like header + tabbed content (Episodes, Consultations, Segments, Documents)
-- **Forms**: Full-page modal with `nz-form` (horizontal layout for fields)
+- **List View**: картки (ПІБ, теги статусу, звання / підрозділ / посада / телефон) на всіх ширинах екрана. Без `nz-table`.
+- **Detail Page**: профіль з полем-чіпами (`field-list`) + вкладки. Епізоди — окремі плитки з кольоровою лівою смугою (бойовий / небойовий), не вкладені білі картки.
+- **Forms**: модалка з `nz-form` (на мобільному на всю ширину).
 
-### Excel Import (Імпорт з таблиць)
-- Drag-and-drop upload area (`nz-upload` dragger mode)
-- Preview table with row selection and conflict indicators
-- Alert banners for validation errors and success messages
+### Excel Import (Імпорт)
+- Drag-and-drop (`nz-upload`)
+- Прев’ю рядків як вибіркові картки (без широкої таблиці)
+- Банери помилок / успіху
 
 ### Status Indicators
 - Episode nature: `nz-tag` with color coding (red=COMBAT, blue=SOMATIC)
@@ -115,5 +113,5 @@ Inspired by Ant Design Pro:
 
 - [ ] Extend theme to other modules as they are implemented
 - [ ] Add dark mode toggle (future iteration)
-- [ ] Refine mobile card layouts for Episodes and Consultations
+- [ ] Додати картки консультацій і сегментів, коли з’явиться логіка
 - [ ] Create reusable component library for common patterns

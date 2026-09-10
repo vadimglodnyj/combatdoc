@@ -1,0 +1,59 @@
+<div class="page-list">
+  <div class="page-list__header">
+    <h1>Сегменти лікування</h1>
+    <nz-input-group nzSearch [nzAddOnAfter]="suffix">
+      <input
+        type="text"
+        nz-input
+        placeholder="Пошук за ПІБ, діагнозом або ЛПЗ"
+        [(ngModel)]="searchValue"
+        (keyup.enter)="onSearch()"
+      />
+    </nz-input-group>
+    <ng-template #suffix>
+      <button nz-button nzType="primary" (click)="onSearch()">Пошук</button>
+    </ng-template>
+  </div>
+
+  <div class="page-list__filters">
+    <nz-select [(ngModel)]="typeFilter" style="min-width: 180px" (ngModelChange)="onFilterChange()">
+      <nz-option nzValue="" nzLabel="Усі типи"></nz-option>
+      <nz-option *ngFor="let item of types" [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+    </nz-select>
+    <nz-select [(ngModel)]="activeFilter" style="min-width: 160px" (ngModelChange)="onFilterChange()">
+      <nz-option nzValue="" nzLabel="Усі сегменти"></nz-option>
+      <nz-option nzValue="true" nzLabel="Відкриті"></nz-option>
+      <nz-option nzValue="false" nzLabel="Закриті"></nz-option>
+    </nz-select>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <p class="page-list__meta" *ngIf="!loading && total > 0">{{ total }} сегментів</p>
+    <nz-empty *ngIf="!loading && items.length === 0" nzNotFoundContent="Немає сегментів"></nz-empty>
+
+    <div class="tile-stack" *ngIf="items.length > 0">
+      <article class="data-tile" *ngFor="let item of items" (click)="open(item)">
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">{{ segmentTitle(item.type, item.facility) }}</h3>
+          <span class="data-tile__action">Епізод</span>
+        </div>
+        <p class="data-tile__date">
+          {{ memberName(item) }} · {{ formatDate(item.dateFrom) }}
+          <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+        </p>
+        <p class="data-tile__diagnosis" *ngIf="item.diagnosis || item.episode?.diagnosis">
+          {{ item.diagnosis || item.episode?.diagnosis }}
+        </p>
+      </article>
+    </div>
+
+    <div class="page-list__pager" *ngIf="total > 20">
+      <nz-pagination
+        [nzPageIndex]="page"
+        [nzPageSize]="pageSize"
+        [nzTotal]="total"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+      ></nz-pagination>
+    </div>
+  </nz-spin>
+</div>

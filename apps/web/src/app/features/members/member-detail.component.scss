@@ -1,72 +1,77 @@
 .member-detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
 
   .detail-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
+    margin-bottom: 16px;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   .profile-card {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 
-    .profile-header {
-      .profile-info {
-        .member-name {
-          font-size: 28px;
-          font-weight: 600;
-          margin: 0 0 12px 0;
-        }
+    .member-name {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+      line-height: 1.25;
+    }
 
-        .member-meta {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-      }
+    .member-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
   }
 
   .tabs-card {
     .tab-content {
-      padding: 16px 0;
-      min-height: 300px;
+      padding: 8px 0 4px;
+      min-height: 180px;
 
       .tab-header {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         display: flex;
-        justify-content: flex-end;
+        justify-content: stretch;
+
+        button {
+          width: 100%;
+        }
+      }
+
+      .section-hint {
+        margin: 0 0 12px;
+        color: rgba(0, 0, 0, 0.55);
+        font-size: 13px;
+        line-height: 1.45;
       }
     }
+  }
 
-    .mt-2 {
-      margin-top: 8px;
-    }
+  .mt-2 {
+    margin-top: 8px;
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .member-detail-container {
     .detail-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-
-      .header-actions {
-        width: 100%;
-        justify-content: flex-end;
-      }
+      margin-bottom: 24px;
     }
 
-    .profile-card .profile-header .profile-info .member-name {
-      font-size: 22px;
+    .profile-card .member-name {
+      font-size: 28px;
+    }
+
+    .tabs-card .tab-content .tab-header {
+      justify-content: flex-end;
+
+      button {
+        width: auto;
+      }
     }
   }
 }

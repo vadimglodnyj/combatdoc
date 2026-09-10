@@ -4,13 +4,19 @@
   "description": "CombatDOC API (NestJS)",
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch",
+    "predev": "node ../../scripts/free-port.cjs && prisma generate",
+    "dev": "nest start --watch --preserveWatchOutput",
     "start": "node dist/main",
     "start:prod": "node dist/main",
+    "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
+    "db:import-turso": "ts-node prisma/import-turso-dump.ts",
+    "db:dedupe-segments": "ts-node prisma/dedupe-care-segments.ts",
+    "test:turso-import": "ts-node prisma/turso-sql.selftest.ts && ts-node prisma/turso-units.selftest.ts && ts-node prisma/turso-care.selftest.ts",
+    "test:clinical": "ts-node src/common/continuous-days.selftest.ts && ts-node src/common/dispatch-message.selftest.ts",
     "db:generate": "prisma generate"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { AuthService } from '../services/auth.service';
 
 const PAGE_TITLES: Record<string, string> = {
   '/members': 'Особовий склад',
@@ -23,7 +24,10 @@ export class LayoutComponent {
   isCollapsed = false;
   pageTitle = '';
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+  ) {
     this.pageTitle = this.resolveTitle(this.router.url);
 
     this.router.events
@@ -39,7 +43,7 @@ export class LayoutComponent {
   }
 
   logout() {
-    localStorage.removeItem('access_token');
-    this.router.navigate(['/login']);
+    this.authService.logout();
+    void this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

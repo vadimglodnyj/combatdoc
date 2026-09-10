@@ -1,7 +1,43 @@
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 12px;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  margin-top: 8px;
+
+  button {
+    width: 100%;
+  }
+}
+
 nz-divider {
-  margin: 24px 0 16px 0;
+  margin: 16px 0 8px 0;
 }
 
 nz-form-item {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-grid__wide {
+    grid-column: 1 / -1;
+  }
+
+  .form-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+
+    button {
+      width: auto;
+    }
+  }
 }

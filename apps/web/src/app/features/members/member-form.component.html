@@ -1,219 +1,157 @@
-<form nz-form [formGroup]="form" nzLayout="vertical">
+<form nz-form [formGroup]="form" nzLayout="vertical" class="member-form">
   <nz-divider nzText="Основні дані" nzOrientation="left"></nz-divider>
 
-  <div nz-row [nzGutter]="16">
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label nzRequired>Прізвище</nz-form-label>
-        <nz-form-control nzErrorTip="Обов'язкове поле">
-          <input nz-input formControlName="lastName" placeholder="Іванов" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+  <div class="form-grid">
+    <nz-form-item>
+      <nz-form-label nzRequired>Прізвище</nz-form-label>
+      <nz-form-control nzErrorTip="Обов'язкове поле">
+        <input nz-input formControlName="lastName" placeholder="Іванов" />
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label nzRequired>Ім'я</nz-form-label>
-        <nz-form-control nzErrorTip="Обов'язкове поле">
-          <input nz-input formControlName="firstName" placeholder="Іван" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label nzRequired>Ім'я</nz-form-label>
+      <nz-form-control nzErrorTip="Обов'язкове поле">
+        <input nz-input formControlName="firstName" placeholder="Іван" />
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label nzRequired>По батькові</nz-form-label>
-        <nz-form-control nzErrorTip="Обов'язкове поле">
-          <input nz-input formControlName="middleName" placeholder="Іванович" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-  </div>
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label nzRequired>По батькові</nz-form-label>
+      <nz-form-control nzErrorTip="Обов'язкове поле">
+        <input nz-input formControlName="middleName" placeholder="Іванович" />
+      </nz-form-control>
+    </nz-form-item>
 
-  <div nz-row [nzGutter]="16">
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label nzRequired>Звання</nz-form-label>
-        <nz-form-control nzErrorTip="Оберіть звання">
-          <nz-select
-            formControlName="rankId"
-            nzShowSearch
-            nzPlaceHolder="Оберіть звання"
-          >
-            <nz-option
-              *ngFor="let rank of ranks"
-              [nzValue]="rank.id"
-              [nzLabel]="rank.name"
-            ></nz-option>
-          </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label nzRequired>Звання</nz-form-label>
+      <nz-form-control nzErrorTip="Оберіть звання">
+        <nz-select formControlName="rankId" nzShowSearch nzPlaceHolder="Оберіть звання">
+          <nz-option *ngFor="let rank of ranks" [nzValue]="rank.id" [nzLabel]="rank.name"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label nzRequired>Підрозділ</nz-form-label>
-        <nz-form-control nzErrorTip="Оберіть підрозділ">
-          <nz-select
-            formControlName="unitId"
-            nzShowSearch
-            nzPlaceHolder="Оберіть підрозділ"
-            (ngModelChange)="onUnitChange($event)"
-          >
-            <nz-option
-              *ngFor="let unit of units"
-              [nzValue]="unit.id"
-              [nzLabel]="unit.name"
-            ></nz-option>
-          </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label nzRequired>Підрозділ</nz-form-label>
+      <nz-form-control nzErrorTip="Оберіть підрозділ">
+        <nz-select
+          formControlName="unitId"
+          nzShowSearch
+          nzPlaceHolder="Оберіть підрозділ"
+          (ngModelChange)="onUnitChange($event)"
+        >
+          <nz-option *ngFor="let unit of units" [nzValue]="unit.id" [nzLabel]="formatUnitOption(unit)"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label>Скорочення</nz-form-label>
-        <nz-form-control>
-          <input nz-input formControlName="unitShortName" placeholder="3029" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-  </div>
+    <nz-form-item>
+      <nz-form-label>Скорочення</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="unitShortName" placeholder="3029" />
+      </nz-form-control>
+    </nz-form-item>
 
-  <div nz-row [nzGutter]="16">
-    <div nz-col [nzSpan]="12">
-      <nz-form-item>
-        <nz-form-label nzRequired>Посада (повна)</nz-form-label>
-        <nz-form-control nzErrorTip="Обов'язкове поле">
-          <input nz-input formControlName="fullPosition" placeholder="Стрілець" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label nzRequired>Посада (повна)</nz-form-label>
+      <nz-form-control nzErrorTip="Обов'язкове поле">
+        <input nz-input formControlName="fullPosition" placeholder="Стрілець" />
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="12">
-      <nz-form-item>
-        <nz-form-label nzRequired>Вид служби</nz-form-label>
-        <nz-form-control>
-          <nz-select formControlName="serviceType">
-            <nz-option nzValue="Контракт" nzLabel="Контракт"></nz-option>
-            <nz-option nzValue="Мобілізований" nzLabel="Мобілізований"></nz-option>
-            <nz-option nzValue="Строкова" nzLabel="Строкова"></nz-option>
-          </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label nzRequired>Вид служби</nz-form-label>
+      <nz-form-control>
+        <nz-select formControlName="serviceType">
+          <nz-option nzValue="Контракт" nzLabel="Контракт"></nz-option>
+          <nz-option nzValue="Мобілізований" nzLabel="Мобілізований"></nz-option>
+          <nz-option nzValue="Строкова" nzLabel="Строкова"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
   </div>
 
   <nz-divider nzText="Особисті дані" nzOrientation="left"></nz-divider>
 
-  <div nz-row [nzGutter]="16">
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label>Дата народження</nz-form-label>
-        <nz-form-control>
-          <nz-date-picker formControlName="birthDate" nzFormat="dd.MM.yyyy" style="width: 100%">
-          </nz-date-picker>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+  <div class="form-grid">
+    <nz-form-item>
+      <nz-form-label>Дата народження</nz-form-label>
+      <nz-form-control>
+        <nz-date-picker formControlName="birthDate" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label>Телефон</nz-form-label>
-        <nz-form-control>
-          <input nz-input formControlName="phone" placeholder="+380..." />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label>Телефон</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="phone" placeholder="+380..." type="tel" />
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="8">
-      <nz-form-item>
-        <nz-form-label>ІПН</nz-form-label>
-        <nz-form-control>
-          <input nz-input formControlName="taxId" placeholder="1234567890" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-  </div>
+    <nz-form-item>
+      <nz-form-label>ІПН</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="taxId" placeholder="1234567890" inputmode="numeric" />
+      </nz-form-control>
+    </nz-form-item>
 
-  <div nz-row [nzGutter]="16">
-    <div nz-col [nzSpan]="12">
-      <nz-form-item>
-        <nz-form-label>Військкомат призову</nz-form-label>
-        <nz-form-control>
-          <input nz-input formControlName="recruitmentOffice" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label>Дата призову</nz-form-label>
+      <nz-form-control>
+        <nz-date-picker formControlName="recruitmentDate" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="12">
-      <nz-form-item>
-        <nz-form-label>Дата призову</nz-form-label>
-        <nz-form-control>
-          <nz-date-picker formControlName="recruitmentDate" nzFormat="dd.MM.yyyy" style="width: 100%">
-          </nz-date-picker>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label>Військкомат призову</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="recruitmentOffice" />
+      </nz-form-control>
+    </nz-form-item>
   </div>
 
   <nz-divider nzText="Освіта" nzOrientation="left"></nz-divider>
 
-  <div nz-row [nzGutter]="16">
-    <div nz-col [nzSpan]="6">
-      <nz-form-item>
-        <nz-form-label>Рівень</nz-form-label>
-        <nz-form-control>
-          <nz-select formControlName="educationLevel" nzAllowClear>
-            <nz-option nzValue="Середня" nzLabel="Середня"></nz-option>
-            <nz-option nzValue="Професійна" nzLabel="Професійна"></nz-option>
-            <nz-option nzValue="Вища" nzLabel="Вища"></nz-option>
-          </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+  <div class="form-grid">
+    <nz-form-item>
+      <nz-form-label>Рівень</nz-form-label>
+      <nz-form-control>
+        <nz-select formControlName="educationLevel" nzAllowClear>
+          <nz-option nzValue="Середня" nzLabel="Середня"></nz-option>
+          <nz-option nzValue="Професійна" nzLabel="Професійна"></nz-option>
+          <nz-option nzValue="Вища" nzLabel="Вища"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="10">
-      <nz-form-item>
-        <nz-form-label>Навчальний заклад</nz-form-label>
-        <nz-form-control>
-          <input nz-input formControlName="educationInstitution" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item>
+      <nz-form-label>Рік</nz-form-label>
+      <nz-form-control>
+        <nz-input-number formControlName="educationYear" [nzMin]="1950" [nzMax]="2030" style="width: 100%">
+        </nz-input-number>
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="4">
-      <nz-form-item>
-        <nz-form-label>Місце</nz-form-label>
-        <nz-form-control>
-          <input nz-input formControlName="educationPlace" />
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label>Навчальний заклад</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="educationInstitution" />
+      </nz-form-control>
+    </nz-form-item>
 
-    <div nz-col [nzSpan]="4">
-      <nz-form-item>
-        <nz-form-label>Рік</nz-form-label>
-        <nz-form-control>
-          <nz-input-number
-            formControlName="educationYear"
-            [nzMin]="1950"
-            [nzMax]="2030"
-            style="width: 100%"
-          ></nz-input-number>
-        </nz-form-control>
-      </nz-form-item>
-    </div>
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label>Місце</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="educationPlace" />
+      </nz-form-control>
+    </nz-form-item>
   </div>
 
-  <nz-form-item>
-    <nz-form-control>
-      <button nz-button nzType="primary" [nzLoading]="loading" (click)="submitForm()">
-        {{ member ? 'Зберегти зміни' : 'Створити картку' }}
-      </button>
-      <button nz-button nzType="default" (click)="cancel()" [disabled]="loading" style="margin-left: 8px">
-        Скасувати
-      </button>
-    </nz-form-control>
-  </nz-form-item>
+  <div class="form-actions">
+    <button nz-button nzType="default" type="button" (click)="cancel()" [disabled]="loading">Скасувати</button>
+    <button nz-button nzType="primary" type="button" [nzLoading]="loading" (click)="submitForm()">
+      {{ member ? 'Зберегти зміни' : 'Створити картку' }}
+    </button>
+  </div>
 </form>

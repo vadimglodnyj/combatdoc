@@ -43,7 +43,6 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -53,6 +52,7 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './features/login/login.component';
 import { LayoutComponent } from './core/layout/layout.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { environment } from '../environments/environment';
 
 registerLocaleData(uk);
 
@@ -96,7 +96,7 @@ const icons: IconDefinition[] = [
     ReactiveFormsModule,
     AppRoutingModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: true,
+      enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000',
     }),
     NzLayoutModule,
@@ -106,7 +106,6 @@ const icons: IconDefinition[] = [
     NzInputModule,
     NzButtonModule,
     NzCardModule,
-    NzTableModule,
     NzTagModule,
     NzMessageModule,
     NzSpinModule,

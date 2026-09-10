@@ -2,12 +2,18 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateServiceMemberDto } from './dto/create-service-member.dto';
 import { UpdateServiceMemberDto } from './dto/update-service-member.dto';
+import { ListServiceMembersQueryDto } from './dto/list-service-members-query.dto';
 
 @Injectable()
 export class ServiceMembersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(search?: string) {
+  async findAll(query: ListServiceMembersQueryDto = {}) {
+    const search = query.search?.trim();
+    const page = query.page ?? 1;
+    const take = query.take ?? 30;
+    const skip = (page - 1) * take;
+
     const where = search
       ? {
           OR: [
@@ -19,19 +25,42 @@ export class ServiceMembersService {
         }
       : {};
 
-    return this.prisma.serviceMember.findMany({
-      where,
-      include: {
-        rank: true,
-        unit: true,
-        episodes: {
-          where: { isActive: true },
-          take: 1,
-          orderBy: { startDate: 'desc' },
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.serviceMember.findMany({
+        where,
+        select: {
+          id: true,
+          lastName: true,
+          firstName: true,
+          middleName: true,
+          rankId: true,
+          unitId: true,
+          serviceType: true,
+          fullPosition: true,
+          unitShortName: true,
+          phone: true,
+          rank: { select: { id: true, code: true, name: true, sortOrder: true } },
+          unit: { select: { id: true, code: true, name: true, shortName: true, sortOrder: true } },
+          episodes: {
+            where: { isActive: true },
+            take: 1,
+            orderBy: { startDate: 'desc' },
+            select: {
+              id: true,
+              nature: true,
+              diagnosis: true,
+              isActive: true,
+            },
+          },
         },
-      },
-      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
-    });
+        orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+        skip,
+        take,
+      }),
+      this.prisma.serviceMember.count({ where }),
+    ]);
+
+    return { items, total, page, take };
   }
 
   async findOne(id: string) {
@@ -43,8 +72,12 @@ export class ServiceMembersService {
         episodes: {
           orderBy: { startDate: 'desc' },
           include: {
-            consultations: { take: 5 },
-            careSegments: { take: 5 },
+            consultations: {
+              include: { facility: true, practitionerRole: true },
+            },
+            careSegments: {
+              include: { facility: true },
+            },
             injuryCertificate: true,
           },
         },

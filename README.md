@@ -62,6 +62,11 @@ pnpm db:migrate
 pnpm db:seed
 cd ../..
 
+# 5б. (опційно) Імпорт старої Turso-БД. Дамп кладіть у apps/api/prisma
+# наприклад turso_journal.*.sql — файл у git НЕ комітиться.
+# pnpm db:import-turso
+
+
 # 6. Запустити dev-сервери (API + Web)
 pnpm dev
 ```
@@ -79,6 +84,27 @@ Email: admin@combatdoc.local
 ```
 
 ⚠️ **Змініть пароль після першого входу!**
+
+### Якщо `EADDRINUSE: address already in use :::3000`
+
+Порт 3000 зайнятий попереднім API (часто після `nest --watch` на Windows). Angular завжди на **4200**.
+
+Dev-режим сам звільняє порт, якщо його тримає старий Node-процес. Якщо помилка лишилась:
+
+```bat
+REM Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+```bash
+# Linux / macOS
+lsof -ti :3000 | xargs kill -9
+# або
+pnpm api:free-port
+```
+
+Потім знову `pnpm dev`. Інший порт API: `PORT=3001` у `apps/api/.env` і той самий URL у `apps/web/src/environments/environment.ts`.
 
 ## UI Theme & Design System
 
@@ -168,6 +194,7 @@ pnpm api:start           # Запустити продакшн
 pnpm db:migrate          # Виконати міграції
 pnpm db:studio           # Prisma Studio UI
 pnpm db:seed             # Заповнити початкові дані
+pnpm db:import-turso     # Імпорт локального Turso SQL-дампа (файл не в git)
 
 # Web
 pnpm web:dev             # Angular dev server

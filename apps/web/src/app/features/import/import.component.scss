@@ -1,9 +1,9 @@
 .import-container {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
 
   h1 {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    font-size: 22px;
   }
 
   .instruction-alert,
@@ -16,49 +16,63 @@
     margin: 16px 0;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+  }
 
-    .overwrite-switch {
-      margin-left: auto;
+  .preview-stack {
+    margin-top: 8px;
+  }
+
+  .error-messages,
+  .warning-messages {
+    margin-top: 8px;
+
+    small {
+      display: block;
+      line-height: 1.4;
     }
   }
 
-  .preview-table {
-    margin-top: 16px;
+  .error-text {
+    color: #ff4d4f;
+  }
 
-    .error-row {
-      background-color: #fff2e8;
-    }
-
-    .error-messages,
-    .warning-messages {
-      margin-top: 4px;
-
-      small {
-        display: block;
-        line-height: 1.4;
-      }
-    }
-
-    .error-text {
-      color: #ff4d4f;
-    }
-
-    .warning-text {
-      color: #faad14;
-    }
+  .warning-text {
+    color: #faad14;
   }
 
   .action-buttons {
-    margin-top: 24px;
+    margin-top: 16px;
     display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+    flex-direction: column-reverse;
+    gap: 8px;
+
+    button {
+      width: 100%;
+    }
   }
 
   .result-actions {
     margin-top: 24px;
+  }
+}
+
+@media (min-width: 768px) {
+  .import-container {
+    h1 {
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+
+    .action-buttons {
+      flex-direction: row;
+      justify-content: flex-end;
+
+      button {
+        width: auto;
+      }
+    }
   }
 }

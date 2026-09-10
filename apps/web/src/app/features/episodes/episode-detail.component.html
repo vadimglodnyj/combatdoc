@@ -49,43 +49,37 @@
           <nz-tag *ngIf="episode.paymentBlockedByCert" nzColor="red">
             ⚠️ Виплати заблоковано
           </nz-tag>
+          <nz-tag [nzColor]="episode.continuousDays120 >= 120 ? 'red' : 'default'">
+            120 днів: {{ episode.continuousDays120 }}
+          </nz-tag>
         </div>
       </div>
     </div>
 
-    <nz-descriptions nzBordered [nzColumn]="3">
-      <nz-descriptions-item nzTitle="Військовослужбовець" [nzSpan]="3">
-        <a [routerLink]="['/members', episode.serviceMemberId]">
-          {{ episode.serviceMember?.lastName }}
-          {{ episode.serviceMember?.firstName }}
-          {{ episode.serviceMember?.middleName }}
-        </a>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Звання">
-        {{ episode.serviceMember?.rank?.name || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Підрозділ" [nzSpan]="2">
-        {{ episode.serviceMember?.unit?.name || '—' }}
-        <span *ngIf="episode.serviceMember?.unitShortName">
-          ({{ episode.serviceMember?.unitShortName }})
-        </span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата початку">
-        {{ formatDate(episode.startDate) }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата завершення" [nzSpan]="2">
-        {{ formatDate(episode.endDate) }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="120-денний лічильник">
-        {{ episode.continuousDays120 }} днів
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Консультації">
-        {{ episode.consultations?.length || 0 }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Сегменти лікування">
-        {{ episode.careSegments?.length || 0 }}
-      </nz-descriptions-item>
-    </nz-descriptions>
+    <dl class="field-list">
+      <div class="field field--wide">
+        <dt class="field__label">Військовослужбовець</dt>
+        <dd class="field__value">
+          <a [routerLink]="['/members', episode.serviceMemberId]">
+            {{ episode.serviceMember?.lastName }}
+            {{ episode.serviceMember?.firstName }}
+            {{ episode.serviceMember?.middleName }}
+          </a>
+          <span *ngIf="episode.serviceMember?.rank?.name">
+            · {{ episode.serviceMember?.rank?.name }}
+          </span>
+          <span *ngIf="formatUnit() !== '—'"> · {{ formatUnit() }}</span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата початку</dt>
+        <dd class="field__value">{{ formatDate(episode.startDate) }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата завершення</dt>
+        <dd class="field__value">{{ formatDate(episode.endDate) }}</dd>
+      </div>
+    </dl>
   </nz-card>
 
   <!-- Injury Certificate Card (COMBAT only) -->
@@ -172,14 +166,119 @@
     </div>
   </nz-card>
 
-  <!-- Consultations placeholder -->
-  <nz-card class="consultations-card" nzTitle="Консультації">
-    <nz-empty nzNotFoundContent="Немає консультацій"></nz-empty>
+  <!-- Consultations -->
+  <nz-card class="consultations-card" nzTitle="Консультації" [nzExtra]="consultExtra">
+    <ng-template #consultExtra>
+      <button nz-button nzType="primary" nzSize="small" (click)="openConsultationForm()">
+        <span nz-icon nzType="plus"></span>
+        Додати
+      </button>
+    </ng-template>
+    <nz-empty *ngIf="consultations.length === 0" nzNotFoundContent="Немає консультацій"></nz-empty>
+    <div class="tile-stack" *ngIf="consultations.length > 0">
+      <article class="data-tile" *ngFor="let item of consultations">
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">
+            {{ consultationKindLabel(item.kind) }}
+            <span *ngIf="item.facility?.shortName || item.facility?.name">
+              · {{ item.facility?.shortName || item.facility?.name }}
+            </span>
+          </h3>
+        </div>
+        <div class="data-tile__tags">
+          <nz-tag [nzColor]="consultationStatusColor(item.status)">
+            {{ consultationStatusLabel(item.status) }}
+          </nz-tag>
+          <nz-tag *ngIf="item.practitionerRole?.name">{{ item.practitionerRole?.name }}</nz-tag>
+        </div>
+        <p class="data-tile__meta">
+          <span *ngIf="item.diagnosis">{{ item.diagnosis }} · </span>
+          {{ formatDate(item.completedDate || item.scheduledDate) }}
+          <span *ngIf="item.notes && item.notes !== item.diagnosis"> · {{ item.notes }}</span>
+        </p>
+        <div class="tile-actions" *ngIf="isReal(item.id)" (click)="$event.stopPropagation()">
+          <button *ngIf="item.status === 'PLANNED'" nz-button nzSize="small" (click)="openConsultationForm(item, true)">
+            Завершити
+          </button>
+          <button nz-button nzSize="small" (click)="openConsultationForm(item)">Редагувати</button>
+          <button *ngIf="item.status === 'PLANNED'" nz-button nzSize="small" nzDanger (click)="cancelConsultation(item)">
+            Скасувати
+          </button>
+          <button
+            nz-button
+            nzSize="small"
+            nzType="dashed"
+            nz-popconfirm
+            nzPopconfirmTitle="Подати рядок у WhatsApp-чат командирів (чат 2)? Зараз лише лог API."
+            (nzOnConfirm)="dispatchConsultation(item)"
+          >
+            У чат командирам
+          </button>
+        </div>
+      </article>
+    </div>
   </nz-card>
 
-  <!-- Care Segments placeholder -->
-  <nz-card class="segments-card" nzTitle="Сегменти лікування">
-    <nz-empty nzNotFoundContent="Немає сегментів"></nz-empty>
+  <!-- Care Segments -->
+  <nz-card class="segments-card" nzTitle="Сегменти лікування" [nzExtra]="segmentExtra">
+    <p class="section-hint">
+      Епізод — справа по діагнозу. Сегмент — період обліку (стаціонар, поліклініка, відпустка ВЛК), не дубль епізоду.
+      Відкритий сегмент = не в строю. «Подати в чати» шле рядок у WhatsApp: чат 1 (стройова / непрацездатність) і чат 2 (командирам). Поки без живого чату — лише лог API.
+    </p>
+    <nz-alert
+      *ngIf="openSegmentCount > 1"
+      nzType="warning"
+      nzShowIcon
+      nzMessage="Є кілька відкритих сегментів. Залиште один: зайвий закрийте або видаліть після повторного імпорту."
+      class="mb-3"
+    ></nz-alert>
+    <ng-template #segmentExtra>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="small"
+        [disabled]="hasOpenSegment"
+        (click)="openSegmentForm('open')"
+      >
+        <span nz-icon nzType="plus"></span>
+        Відкрити
+      </button>
+    </ng-template>
+    <nz-empty *ngIf="segments.length === 0" nzNotFoundContent="Немає сегментів"></nz-empty>
+    <div class="tile-stack" *ngIf="segments.length > 0">
+      <article class="data-tile data-tile--static" *ngFor="let item of segments">
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">{{ careSegmentTitle(item.type, item.facility) }}</h3>
+          <nz-tag *ngIf="!item.dateTo" nzColor="green">Відкритий</nz-tag>
+        </div>
+        <p class="data-tile__date">
+          {{ formatDate(item.dateFrom) }}
+          <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+        </p>
+        <p class="data-tile__diagnosis" *ngIf="item.diagnosis">{{ item.diagnosis }}</p>
+        <p class="data-tile__notes" *ngIf="item.notes && item.notes !== item.diagnosis">{{ item.notes }}</p>
+        <div class="tile-actions" *ngIf="isReal(item.id)" (click)="$event.stopPropagation()">
+          <button nz-button nzSize="small" (click)="openSegmentForm('edit', item)">Редагувати</button>
+          <button *ngIf="!item.dateTo" nz-button nzSize="small" (click)="closeSegment(item)">Закрити</button>
+          <button *ngIf="item.type === 'AMB'" nz-button nzSize="small" (click)="openSegmentForm('prolong', item)">
+            Продовжити
+          </button>
+          <button *ngIf="!item.dateTo" nz-button nzSize="small" (click)="openSegmentForm('transition', item)">
+            Перехід
+          </button>
+          <button
+            nz-button
+            nzSize="small"
+            nzType="dashed"
+            nz-popconfirm
+            nzPopconfirmTitle="Подати в WhatsApp: чат 1 (непрацездатність) і чат 2 (командирам)? Зараз лише лог API."
+            (nzOnConfirm)="dispatchSegment(item)"
+          >
+            Подати в чати
+          </button>
+        </div>
+      </article>
+    </div>
   </nz-card>
 </div>
 

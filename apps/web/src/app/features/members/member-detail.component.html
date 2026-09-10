@@ -31,7 +31,7 @@
         <h1 class="member-name">{{ getFullName() }}</h1>
         <div class="member-meta">
           <nz-tag [nzColor]="'blue'">{{ member.rank?.name }}</nz-tag>
-          <nz-tag>{{ member.unit?.name }}</nz-tag>
+          <nz-tag>{{ formatUnit() }}</nz-tag>
           <nz-tag *ngIf="getActiveEpisodesCount() > 0" nzColor="orange">
             Активні епізоди: {{ getActiveEpisodesCount() }}
           </nz-tag>
@@ -41,49 +41,65 @@
 
     <nz-divider></nz-divider>
 
-    <nz-descriptions [nzColumn]="3" nzBordered>
-      <nz-descriptions-item nzTitle="Звання">
-        {{ member.rank?.name }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Підрозділ">
-        {{ member.unit?.name }}
-        <span *ngIf="member.unitShortName"> ({{ member.unitShortName }})</span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Вид служби">
-        {{ member.serviceType }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Посада" [nzSpan]="3">
-        {{ member.fullPosition }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата народження">
-        {{ formatDate(member.birthDate) }}
-        <span *ngIf="getAge()"> ({{ getAge() }} років)</span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Телефон">
-        <a *ngIf="member.phone" href="tel:{{ member.phone }}">{{ member.phone }}</a>
-        <span *ngIf="!member.phone">—</span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="ІПН">
-        {{ member.taxId || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Військкомат призову" [nzSpan]="2">
-        {{ member.recruitmentOffice || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата призову">
-        {{ formatDate(member.recruitmentDate) }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Освіта">
-        {{ member.educationLevel || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Навчальний заклад" [nzSpan]="2">
-        <div *ngIf="member.educationInstitution">
-          {{ member.educationInstitution }}
-          <span *ngIf="member.educationPlace">, {{ member.educationPlace }}</span>
-          <span *ngIf="member.educationYear"> ({{ member.educationYear }})</span>
-        </div>
-        <span *ngIf="!member.educationInstitution">—</span>
-      </nz-descriptions-item>
-    </nz-descriptions>
+    <dl class="field-list">
+      <div class="field">
+        <dt class="field__label">Звання</dt>
+        <dd class="field__value">{{ member.rank?.name || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Підрозділ</dt>
+        <dd class="field__value">{{ formatUnit() }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Вид служби</dt>
+        <dd class="field__value">{{ member.serviceType || '—' }}</dd>
+      </div>
+      <div class="field field--wide">
+        <dt class="field__label">Посада</dt>
+        <dd class="field__value">{{ member.fullPosition || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата народження</dt>
+        <dd class="field__value">
+          {{ formatDate(member.birthDate) }}
+          <span *ngIf="getAge()"> ({{ getAge() }} років)</span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Телефон</dt>
+        <dd class="field__value">
+          <a *ngIf="member.phone" href="tel:{{ member.phone }}">{{ member.phone }}</a>
+          <span *ngIf="!member.phone">—</span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">ІПН</dt>
+        <dd class="field__value">{{ member.taxId || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Військкомат призову</dt>
+        <dd class="field__value">{{ member.recruitmentOffice || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата призову</dt>
+        <dd class="field__value">{{ formatDate(member.recruitmentDate) }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Освіта</dt>
+        <dd class="field__value">{{ member.educationLevel || '—' }}</dd>
+      </div>
+      <div class="field field--wide">
+        <dt class="field__label">Навчальний заклад</dt>
+        <dd class="field__value">
+          <ng-container *ngIf="member.educationInstitution">
+            {{ member.educationInstitution }}
+            <span *ngIf="member.educationPlace">, {{ member.educationPlace }}</span>
+            <span *ngIf="member.educationYear"> ({{ member.educationYear }})</span>
+          </ng-container>
+          <span *ngIf="!member.educationInstitution">—</span>
+        </dd>
+      </div>
+    </dl>
   </nz-card>
 
   <nz-card class="tabs-card">
@@ -96,6 +112,9 @@
               Створити епізод
             </button>
           </div>
+          <p class="section-hint">
+            Епізод — справа по діагнозу. Усередині нього консультації (візити) і сегменти (стаціонар / поліклініка / ВЛК).
+          </p>
 
           <nz-spin [nzSpinning]="episodesLoading">
             <nz-empty
@@ -103,14 +122,20 @@
               nzNotFoundContent="Немає епізодів лікування"
             ></nz-empty>
 
-            <nz-list
-              *ngIf="episodes.length > 0"
-            [nzDataSource]="episodes"
-            [nzRenderItem]="episodeTemplate"
-          >
-            <ng-template #episodeTemplate let-episode>
-              <nz-list-item [nzActions]="[viewAction]">
-                <nz-card [nzTitle]="episode.diagnosis">
+            <div class="tile-stack" *ngIf="episodes.length > 0">
+              <article
+                class="data-tile"
+                *ngFor="let episode of episodes"
+                [class.data-tile--combat]="episode.nature === 'COMBAT'"
+                [class.data-tile--somatic]="episode.nature === 'SOMATIC'"
+                [class.data-tile--muted]="!episode.isActive"
+                (click)="viewEpisode(episode)"
+              >
+                <div class="data-tile__head">
+                  <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>
+                  <span class="data-tile__action">Переглянути</span>
+                </div>
+                <div class="data-tile__tags">
                   <nz-tag [nzColor]="getNatureColor(episode.nature)">
                     {{ getNatureLabel(episode.nature) }}
                   </nz-tag>
@@ -123,32 +148,94 @@
                   >
                     Довідка №5: {{ getCertStatusLabel(episode.injuryCertificate.status) }}
                   </nz-tag>
-                  <p>
-                    <strong>Початок:</strong> {{ formatDate(episode.startDate) }}
-                  </p>
-                  <p *ngIf="episode.endDate">
-                    <strong>Завершення:</strong> {{ formatDate(episode.endDate) }}
-                  </p>
-                </nz-card>
-                <ng-template #viewAction>
-                  <a (click)="viewEpisode(episode)">Переглянути</a>
-                </ng-template>
-              </nz-list-item>
-            </ng-template>
-          </nz-list>
+                  <nz-tag [nzColor]="episode.continuousDays120 >= 120 ? 'red' : 'default'">
+                    120 днів: {{ episode.continuousDays120 }}
+                  </nz-tag>
+                </div>
+                <p class="data-tile__meta">
+                  Початок: {{ formatDate(episode.startDate) }}
+                  <span *ngIf="episode.endDate"> · Завершення: {{ formatDate(episode.endDate) }}</span>
+                </p>
+              </article>
+            </div>
           </nz-spin>
         </div>
       </nz-tab>
 
       <nz-tab nzTitle="Консультації">
         <div class="tab-content">
-          <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+          <div class="tab-header">
+            <button nz-button nzType="primary" (click)="openConsultationForm()">
+              <span nz-icon nzType="plus"></span>
+              Додати консультацію
+            </button>
+          </div>
+          <nz-empty
+            *ngIf="memberConsultations.length === 0"
+            nzNotFoundContent="Немає консультацій"
+          ></nz-empty>
+          <div class="tile-stack" *ngIf="memberConsultations.length > 0">
+            <article
+              class="data-tile"
+              *ngFor="let item of memberConsultations"
+              (click)="viewEpisode(item.episode!)"
+            >
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">
+                  {{ consultationKindLabel(item.kind) }}
+                  <span *ngIf="item.facility?.shortName || item.facility?.name">
+                    · {{ item.facility?.shortName || item.facility?.name }}
+                  </span>
+                </h3>
+                <span class="data-tile__action">Епізод</span>
+              </div>
+              <div class="data-tile__tags">
+                <nz-tag [nzColor]="consultationStatusColor(item.status)">
+                  {{ consultationStatusLabel(item.status) }}
+                </nz-tag>
+                <nz-tag *ngIf="consultationDiagnosis(item)">{{ consultationDiagnosis(item) }}</nz-tag>
+              </div>
+              <p class="data-tile__meta">
+                {{ formatDate(item.completedDate || item.scheduledDate) }}
+                <span *ngIf="item.practitionerRole?.name"> · {{ item.practitionerRole?.name }}</span>
+                <span *ngIf="item.notes && item.notes !== consultationDiagnosis(item)"> · {{ item.notes }}</span>
+              </p>
+            </article>
+          </div>
         </div>
       </nz-tab>
 
       <nz-tab nzTitle="Сегменти лікування">
         <div class="tab-content">
-          <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+          <div class="tab-header">
+            <button nz-button nzType="primary" (click)="openSegmentForm()">
+              <span nz-icon nzType="plus"></span>
+              Відкрити сегмент
+            </button>
+          </div>
+          <nz-empty
+            *ngIf="memberSegments.length === 0"
+            nzNotFoundContent="Немає сегментів лікування"
+          ></nz-empty>
+          <div class="tile-stack" *ngIf="memberSegments.length > 0">
+            <article
+              class="data-tile"
+              *ngFor="let item of memberSegments"
+              (click)="viewEpisode(item.episode!)"
+            >
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ careSegmentTitle(item.type, item.facility) }}</h3>
+                <span class="data-tile__action">Епізод</span>
+              </div>
+              <p class="data-tile__date">
+                {{ formatDate(item.dateFrom) }}
+                <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+              </p>
+              <p class="data-tile__diagnosis" *ngIf="item.diagnosis || item.episode?.diagnosis">
+                {{ item.diagnosis || item.episode?.diagnosis }}
+              </p>
+            </article>
+          </div>
         </div>
       </nz-tab>
 

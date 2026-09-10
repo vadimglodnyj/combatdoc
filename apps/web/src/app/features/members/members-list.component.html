@@ -26,73 +26,23 @@
     <span nz-icon nzType="search"></span>
   </ng-template>
 
-  <!-- Desktop Table View (≥md) -->
-  <nz-table
-    *ngIf="isDesktop"
-    #basicTable
-    [nzData]="members"
-    [nzLoading]="loading"
-    [nzShowPagination]="true"
-    [nzPageSize]="20"
-    class="desktop-table"
-  >
-    <thead>
-      <tr>
-        <th>ПІБ</th>
-        <th>Звання</th>
-        <th>Підрозділ</th>
-        <th>Посада</th>
-        <th>Телефон</th>
-        <th>Статус</th>
-        <th nzWidth="180px">Дії</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let member of basicTable.data" class="table-row">
-        <td>
-          <a (click)="viewDetail(member)" class="member-name">
-            {{ getFullName(member) }}
-          </a>
-        </td>
-        <td>{{ member.rank?.name }}</td>
-        <td>{{ member.unit?.shortName || member.unit?.name }}</td>
-        <td>{{ member.fullPosition }}</td>
-        <td>{{ member.phone || '—' }}</td>
-        <td>
-          <nz-tag
-            *ngIf="member.episodes && member.episodes.length > 0"
-            [nzColor]="getNatureColor(member.episodes[0].nature)"
-          >
-            {{ member.episodes[0].nature === 'COMBAT' ? 'Бойова' : 'Небойова' }}
-          </nz-tag>
-          <nz-tag *ngIf="!member.episodes || member.episodes.length === 0" nzColor="default">
-            В строю
-          </nz-tag>
-        </td>
-        <td>
-          <nz-space>
-            <button
-              *nzSpaceItem
-              nz-button
-              nzType="link"
-              nzSize="small"
-              (click)="viewDetail(member)"
-            >
-              <span nz-icon nzType="eye"></span>
-            </button>
-            <button
-              *nzSpaceItem
-              nz-button
-              nzType="link"
-              nzSize="small"
-              (click)="openEditModal(member)"
-            >
+  <nz-spin [nzSpinning]="loading">
+    <nz-empty *ngIf="!loading && members.length === 0" nzNotFoundContent="Немає карток"></nz-empty>
+
+    <p class="list-meta" *ngIf="!loading && total > 0">{{ total }} карток</p>
+
+    <div class="tile-stack" *ngIf="members.length > 0">
+      <article class="data-tile" *ngFor="let member of members" (click)="viewDetail(member)">
+        <div class="data-tile__head">
+          <h2 class="data-tile__title">{{ getFullName(member) }}</h2>
+          <nz-space (click)="$event.stopPropagation()">
+            <button *nzSpaceItem nz-button nzType="text" nzSize="small" (click)="openEditModal(member)">
               <span nz-icon nzType="edit"></span>
             </button>
             <button
               *nzSpaceItem
               nz-button
-              nzType="link"
+              nzType="text"
               nzSize="small"
               nzDanger
               nz-popconfirm
@@ -102,77 +52,51 @@
               <span nz-icon nzType="delete"></span>
             </button>
           </nz-space>
-        </td>
-      </tr>
-    </tbody>
-  </nz-table>
+        </div>
 
-  <!-- Mobile Card View (<md) -->
-  <nz-list
-    *ngIf="!isDesktop"
-    [nzDataSource]="members"
-    [nzLoading]="loading"
-    [nzItemLayout]="'vertical'"
-    class="mobile-list"
-  >
-    <nz-list-item *ngFor="let member of members" [nzContent]="cardContent">
-      <ng-template #cardContent>
-        <nz-card [nzTitle]="cardTitle" [nzExtra]="cardExtra" (click)="viewDetail(member)" class="member-card">
-          <ng-template #cardTitle>
-            <div class="card-title">
-              <strong>{{ getFullName(member) }}</strong>
-              <nz-tag
-                *ngIf="member.episodes && member.episodes.length > 0"
-                [nzColor]="getNatureColor(member.episodes[0].nature)"
-                class="card-status-tag"
-              >
-                {{ member.episodes[0].nature === 'COMBAT' ? 'Бойова' : 'Небойова' }}
-              </nz-tag>
-            </div>
-          </ng-template>
-          <ng-template #cardExtra>
-            <nz-space>
-              <button
-                *nzSpaceItem
-                nz-button
-                nzType="text"
-                nzSize="small"
-                (click)="openEditModal(member); $event.stopPropagation()"
-              >
-                <span nz-icon nzType="edit"></span>
-              </button>
-              <button
-                *nzSpaceItem
-                nz-button
-                nzType="text"
-                nzSize="small"
-                nzDanger
-                nz-popconfirm
-                nzPopconfirmTitle="Видалити?"
-                (nzOnConfirm)="deleteMember(member)"
-                (click)="$event.stopPropagation()"
-              >
-                <span nz-icon nzType="delete"></span>
-              </button>
-            </nz-space>
-          </ng-template>
+        <div class="data-tile__tags">
+          <nz-tag
+            *ngIf="member.episodes && member.episodes.length > 0"
+            [nzColor]="getNatureColor(member.episodes[0].nature)"
+          >
+            {{ member.episodes[0].nature === 'COMBAT' ? 'Бойова' : 'Небойова' }}
+          </nz-tag>
+          <nz-tag *ngIf="!member.episodes || member.episodes.length === 0">В строю</nz-tag>
+        </div>
 
-          <nz-descriptions [nzColumn]="1" nzSize="small">
-            <nz-descriptions-item nzTitle="Звання">
-              {{ member.rank?.name }}
-            </nz-descriptions-item>
-            <nz-descriptions-item nzTitle="Підрозділ">
-              {{ member.unit?.shortName || member.unit?.name }}
-            </nz-descriptions-item>
-            <nz-descriptions-item nzTitle="Посада">
-              {{ member.fullPosition }}
-            </nz-descriptions-item>
-            <nz-descriptions-item nzTitle="Телефон" *ngIf="member.phone">
-              <a href="tel:{{ member.phone }}">{{ member.phone }}</a>
-            </nz-descriptions-item>
-          </nz-descriptions>
-        </nz-card>
-      </ng-template>
-    </nz-list-item>
-  </nz-list>
+        <dl class="field-list member-fields">
+          <div class="field">
+            <dt class="field__label">Звання</dt>
+            <dd class="field__value">{{ member.rank?.name || '—' }}</dd>
+          </div>
+          <div class="field">
+            <dt class="field__label">Підрозділ</dt>
+            <dd class="field__value">{{ formatUnit(member) }}</dd>
+          </div>
+          <div class="field field--wide">
+            <dt class="field__label">Посада</dt>
+            <dd class="field__value">{{ member.fullPosition || '—' }}</dd>
+          </div>
+          <div class="field field--wide" *ngIf="member.phone">
+            <dt class="field__label">Телефон</dt>
+            <dd class="field__value">
+              <a href="tel:{{ member.phone }}" (click)="$event.stopPropagation()">{{ member.phone }}</a>
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+
+    <div class="list-pager" *ngIf="total > 20">
+      <nz-pagination
+        [nzPageIndex]="page"
+        [nzPageSize]="pageSize"
+        [nzTotal]="total"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[20, 30, 50]"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  </nz-spin>
 </div>

@@ -8,7 +8,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
-import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -19,9 +18,11 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 import { EpisodesListComponent } from './episodes-list.component';
 import { EpisodeDetailComponent } from './episode-detail.component';
+import { ClinicalFormsModule } from '../clinical/clinical-forms.module';
 
 const routes: Routes = [
   { path: '', component: EpisodesListComponent },
@@ -39,7 +40,6 @@ const routes: Routes = [
     NzIconModule,
     NzTagModule,
     NzSpaceModule,
-    NzDescriptionsModule,
     NzAlertModule,
     NzUploadModule,
     NzModalModule,
@@ -50,6 +50,8 @@ const routes: Routes = [
     NzEmptyModule,
     NzDividerModule,
     NzPopconfirmModule,
+    NzPaginationModule,
+    ClinicalFormsModule,
   ],
 })
 export class EpisodesModule {}

@@ -9,18 +9,22 @@
   ],
   "scripts": {
     "api:dev": "pnpm --filter api dev",
+    "api:free-port": "node scripts/free-port.cjs",
     "api:build": "pnpm --filter api build",
     "api:start": "pnpm --filter api start:prod",
     "web:dev": "pnpm --filter web dev",
     "web:build": "pnpm --filter web build",
     "web:start": "pnpm --filter web start",
     "db:migrate": "pnpm --filter api db:migrate",
+    "db:generate": "pnpm --filter api db:generate",
     "db:studio": "pnpm --filter api db:studio",
     "db:seed": "pnpm --filter api db:seed",
+    "db:import-turso": "pnpm --filter api db:import-turso",
+    "db:dedupe-segments": "pnpm --filter api db:dedupe-segments",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "install:all": "pnpm install",
-    "dev": "pnpm docker:up && concurrently \"pnpm api:dev\" \"pnpm web:dev\"",
+    "dev": "pnpm docker:up && concurrently -n api,web -c cyan,magenta \"pnpm api:dev\" \"pnpm web:dev\"",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules"
   },
   "devDependencies": {

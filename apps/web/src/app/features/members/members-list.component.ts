@@ -5,6 +5,7 @@ import { ServiceMember } from '../../core/models/service-member.model';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MemberFormComponent } from './member-form.component';
+import { formatUnitLabel } from '../../core/utils/format-unit';
 
 @Component({
   selector: 'app-members-list',
@@ -15,18 +16,16 @@ export class MembersListComponent implements OnInit {
   members: ServiceMember[] = [];
   loading = false;
   searchValue = '';
-  isDesktop = window.innerWidth >= 768;
+  page = 1;
+  pageSize = 30;
+  total = 0;
 
   constructor(
     private serviceMemberService: ServiceMemberService,
     private router: Router,
     private modal: NzModalService,
     private message: NzMessageService,
-  ) {
-    window.addEventListener('resize', () => {
-      this.isDesktop = window.innerWidth >= 768;
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadMembers();
@@ -34,28 +33,51 @@ export class MembersListComponent implements OnInit {
 
   loadMembers(): void {
     this.loading = true;
-    this.serviceMemberService.getAll(this.searchValue).subscribe({
+    this.serviceMemberService.getAll(this.searchValue, this.page, this.pageSize).subscribe({
       next: (data) => {
-        this.members = data;
+        this.members = data.items;
+        this.total = data.total;
+        this.page = data.page;
+        this.pageSize = data.take;
         this.loading = false;
       },
       error: (err) => {
         console.error('Error loading members:', err);
-        this.message.error('Помилка завантаження даних');
+        if (err?.status === 401) {
+          this.message.warning('Потрібен вхід. Використовуйте admin@combatdoc.local / admin123');
+        } else {
+          this.message.error('Помилка завантаження даних');
+        }
         this.loading = false;
       },
     });
   }
 
   onSearch(): void {
+    this.page = 1;
     this.loadMembers();
+  }
+
+  onPageIndexChange(page: number): void {
+    this.page = page;
+    this.loadMembers();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.page = 1;
+    this.loadMembers();
+  }
+
+  formatUnit(member: ServiceMember): string {
+    return formatUnitLabel(member.unit, member.unitShortName);
   }
 
   openCreateModal(): void {
     const modal = this.modal.create({
       nzTitle: 'Додати військовослужбовця',
       nzContent: MemberFormComponent,
-      nzWidth: 800,
+      nzWidth: this.formModalWidth(),
       nzFooter: null,
     });
 
@@ -71,7 +93,7 @@ export class MembersListComponent implements OnInit {
       nzTitle: 'Редагувати картку',
       nzContent: MemberFormComponent,
       nzData: { member },
-      nzWidth: 800,
+      nzWidth: this.formModalWidth(),
       nzFooter: null,
     });
 
@@ -109,5 +131,9 @@ export class MembersListComponent implements OnInit {
 
   getNatureColor(nature: string): string {
     return nature === 'COMBAT' ? 'red' : 'blue';
+  }
+
+  private formModalWidth(): string | number {
+    return window.innerWidth < 768 ? '100%' : 720;
   }
 }

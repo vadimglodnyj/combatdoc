@@ -20,6 +20,7 @@ import { ImportService } from './import.service';
 import { CreateServiceMemberDto } from './dto/create-service-member.dto';
 import { UpdateServiceMemberDto } from './dto/update-service-member.dto';
 import { ImportApplyRequest } from './dto/import-preview.dto';
+import { ListServiceMembersQueryDto } from './dto/list-service-members-query.dto';
 
 @Controller('service-members')
 @UseGuards(JwtAuthGuard)
@@ -30,8 +31,8 @@ export class ServiceMembersController {
   ) {}
 
   @Get()
-  findAll(@Query('search') search?: string) {
-    return this.serviceMembersService.findAll(search);
+  findAll(@Query() query: ListServiceMembersQueryDto) {
+    return this.serviceMembersService.findAll(query);
   }
 
   @Get(':id')

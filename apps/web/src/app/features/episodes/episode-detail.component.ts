@@ -1,11 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EpisodeService } from '../../core/services/episode.service';
-import { Episode, InjuryCertificate } from '../../core/models/service-member.model';
+import { Episode, InjuryCertificate, Consultation, CareSegment } from '../../core/models/service-member.model';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { ConsultationFormComponent } from '../clinical/consultation-form.component';
+import { SegmentFormComponent } from '../clinical/segment-form.component';
+import { ClinicalService } from '../../core/services/clinical.service';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { formatUnitLabel } from '../../core/utils/format-unit';
+import {
+  careSegmentTitle,
+  consultationKindLabel,
+  consultationStatusColor,
+  consultationStatusLabel,
+  looksLikeConsultationTitle,
+  segmentTypeFromTitle,
+} from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-episode-detail',
@@ -24,7 +37,9 @@ export class EpisodeDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private episodeService: EpisodeService,
-    private message: NzMessageService
+    private clinical: ClinicalService,
+    private message: NzMessageService,
+    private modal: NzModalService,
   ) {}
 
   ngOnInit(): void {
@@ -60,6 +75,141 @@ export class EpisodeDetailComponent implements OnInit {
   formatDate(date?: string): string {
     if (!date) return '—';
     return format(new Date(date), 'dd.MM.yyyy', { locale: uk });
+  }
+
+  formatUnit(): string {
+    return formatUnitLabel(
+      this.episode?.serviceMember?.unit,
+      this.episode?.serviceMember?.unitShortName,
+    );
+  }
+
+  get consultations(): Consultation[] {
+    const nested = this.episode?.consultations || [];
+    if (nested.length || !this.episode || !looksLikeConsultationTitle(this.episode.diagnosis)) {
+      return nested;
+    }
+    return [
+      {
+        id: `from-episode-${this.episode.id}`,
+        episodeId: this.episode.id,
+        kind: 'VISIT',
+        status: this.episode.isActive ? 'PLANNED' : 'DONE',
+        facilityId: '',
+        practitionerRoleId: '',
+        completedDate: this.episode.endDate || this.episode.startDate,
+        diagnosis: this.episode.diagnosis,
+        notes: this.episode.diagnosis,
+        createdAt: this.episode.createdAt,
+        updatedAt: this.episode.updatedAt,
+      },
+    ];
+  }
+
+  get segments(): CareSegment[] {
+    const nested = this.episode?.careSegments || [];
+    if (nested.length || !this.episode) return nested;
+    const type = segmentTypeFromTitle(this.episode.diagnosis);
+    if (!type) return nested;
+    return [
+      {
+        id: `from-episode-${this.episode.id}`,
+        episodeId: this.episode.id,
+        type: type as CareSegment['type'],
+        dateFrom: this.episode.startDate,
+        dateTo: this.episode.endDate,
+        facilityId: '',
+        diagnosis: this.episode.diagnosis,
+        createdAt: this.episode.createdAt,
+        updatedAt: this.episode.updatedAt,
+      },
+    ];
+  }
+
+  consultationKindLabel = consultationKindLabel;
+  consultationStatusLabel = consultationStatusLabel;
+  consultationStatusColor = consultationStatusColor;
+  careSegmentTitle = careSegmentTitle;
+
+  isReal(id?: string): boolean {
+    return !!id && !id.startsWith('from-episode-');
+  }
+
+  get hasOpenSegment(): boolean {
+    return this.openSegmentCount > 0;
+  }
+
+  get openSegmentCount(): number {
+    return this.segments.filter((item) => this.isReal(item.id) && !item.dateTo).length;
+  }
+
+  openConsultationForm(consultation?: Consultation, complete = false): void {
+    if (!this.episode) return;
+    const ref = this.modal.create({
+      nzTitle: consultation ? (complete ? 'Завершити консультацію' : 'Редагувати консультацію') : 'Нова консультація',
+      nzContent: ConsultationFormComponent,
+      nzData: { episodeId: this.episode.id, diagnosis: this.episode.diagnosis, consultation, complete },
+      nzFooter: null,
+      nzWidth: window.innerWidth < 768 ? '100%' : 640,
+    });
+    ref.afterClose.subscribe((ok) => ok && this.loadEpisode(this.episode!.id));
+  }
+
+  openSegmentForm(mode: 'open' | 'edit' | 'prolong' | 'transition' = 'open', segment?: CareSegment): void {
+    if (!this.episode) return;
+    const titles = {
+      open: 'Відкрити сегмент',
+      edit: 'Редагувати сегмент',
+      prolong: 'Продовжити поліклініку',
+      transition: 'Перехід на інший сегмент',
+    };
+    const ref = this.modal.create({
+      nzTitle: titles[mode],
+      nzContent: SegmentFormComponent,
+      nzData: {
+        episodeId: this.episode.id,
+        diagnosis: this.episode.diagnosis,
+        segment,
+        mode,
+      },
+      nzFooter: null,
+      nzWidth: window.innerWidth < 768 ? '100%' : 640,
+    });
+    ref.afterClose.subscribe((ok) => ok && this.loadEpisode(this.episode!.id));
+  }
+
+  cancelConsultation(item: Consultation): void {
+    this.clinical.cancelConsultation(item.id).subscribe({
+      next: () => {
+        this.message.success('Консультацію скасовано');
+        this.loadEpisode(this.episode!.id);
+      },
+      error: (err) => this.message.error(err.error?.message || 'Помилка'),
+    });
+  }
+
+  dispatchConsultation(item: Consultation): void {
+    this.clinical.dispatchConsultation(item.id).subscribe({
+      next: (res) => this.message.success(res.text || 'Подано в чат 2'),
+      error: (err) => this.message.error(err.error?.message || 'Помилка подачі'),
+    });
+  }
+
+  closeSegment(item: CareSegment): void {
+    this.clinical.closeSegment(item.id).subscribe({
+      next: () => {
+        this.message.success('Сегмент закрито');
+        this.loadEpisode(this.episode!.id);
+      },
+      error: (err) => this.message.error(err.error?.message || 'Помилка'),
+    });
+  }
+
+  dispatchSegment(item: CareSegment): void {
+    this.clinical.dispatchSegment(item.id).subscribe({
+      next: (res) => this.message.success(res.text || 'Подано в чати'),
+      error: (err) => this.message.error(err.error?.message || 'Помилка подачі'),
+    });
   }
 
   closeEpisode(): void {
