@@ -3,6 +3,7 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateEpisodeDto } from './dto/create-episode.dto';
 import { UpdateEpisodeDto } from './dto/update-episode.dto';
 import { ListEpisodesQueryDto } from './dto/list-episodes-query.dto';
+import { computeContinuousDays120 } from '../common/continuous-days';
 
 @Injectable()
 export class EpisodesService {
@@ -275,6 +276,7 @@ export class EpisodesService {
 
     return {
       ...episode,
+      continuousDays120: computeContinuousDays120(episode.careSegments || []),
       paymentBlockedByCert,
     };
   }

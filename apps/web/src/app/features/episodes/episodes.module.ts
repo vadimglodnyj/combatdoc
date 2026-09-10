@@ -22,6 +22,7 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 import { EpisodesListComponent } from './episodes-list.component';
 import { EpisodeDetailComponent } from './episode-detail.component';
+import { ClinicalFormsModule } from '../clinical/clinical-forms.module';
 
 const routes: Routes = [
   { path: '', component: EpisodesListComponent },
@@ -50,6 +51,7 @@ const routes: Routes = [
     NzDividerModule,
     NzPopconfirmModule,
     NzPaginationModule,
+    ClinicalFormsModule,
   ],
 })
 export class EpisodesModule {}

@@ -26,6 +26,7 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { MembersListComponent } from './members-list.component';
 import { MemberDetailComponent } from './member-detail.component';
 import { MemberFormComponent } from './member-form.component';
+import { ClinicalFormsModule } from '../clinical/clinical-forms.module';
 
 const routes: Routes = [
   { path: '', component: MembersListComponent },
@@ -58,6 +59,7 @@ const routes: Routes = [
     NzEmptyModule,
     NzRadioModule,
     NzPaginationModule,
+    ClinicalFormsModule,
   ],
 })
 export class MembersModule {}

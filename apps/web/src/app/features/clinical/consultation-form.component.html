@@ -1,0 +1,107 @@
+<form nz-form [formGroup]="form" nzLayout="vertical">
+  <div class="form-grid">
+    <nz-form-item>
+      <nz-form-label nzRequired>Тип</nz-form-label>
+      <nz-form-control>
+        <nz-select formControlName="kind">
+          <nz-option nzValue="VISIT" nzLabel="Візит / консультація"></nz-option>
+          <nz-option nzValue="EXAM" nzLabel="Обстеження"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>Статус</nz-form-label>
+      <nz-form-control>
+        <nz-select formControlName="status" [nzDisabled]="completeMode">
+          <nz-option nzValue="PLANNED" nzLabel="Заплановано"></nz-option>
+          <nz-option nzValue="DONE" nzLabel="Виконано"></nz-option>
+          <nz-option nzValue="CANCELLED" nzLabel="Скасовано"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>ЛПЗ</nz-form-label>
+      <nz-form-control nzErrorTip="Оберіть заклад">
+        <nz-select formControlName="facilityId" nzShowSearch nzPlaceHolder="ЛПЗ / МПБ">
+          <nz-option
+            *ngFor="let item of facilities"
+            [nzValue]="item.id"
+            [nzLabel]="item.shortName ? item.shortName + ' — ' + item.name : item.name"
+          ></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>Спеціаліст</nz-form-label>
+      <nz-form-control nzErrorTip="Оберіть роль">
+        <nz-select formControlName="practitionerRoleId" nzShowSearch nzPlaceHolder="Роль лікаря">
+          <nz-option *ngFor="let item of roles" [nzValue]="item.id" [nzLabel]="item.name"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>Запланована дата</nz-form-label>
+      <nz-form-control>
+        <nz-date-picker formControlName="scheduledDate" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>Дата виконання</nz-form-label>
+      <nz-form-control>
+        <nz-date-picker formControlName="completedDate" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label>Примітка</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="notes" rows="2"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <nz-form-item>
+    <nz-form-label>Наступна дія</nz-form-label>
+    <nz-form-control>
+      <nz-select formControlName="outcomeKind">
+        <nz-option nzValue="NONE" nzLabel="Немає"></nz-option>
+        <nz-option nzValue="CONSULTATION" nzLabel="Запланувати консультацію"></nz-option>
+        <nz-option nzValue="EXAM" nzLabel="Запланувати обстеження"></nz-option>
+        <nz-option nzValue="CARE_SEGMENT" nzLabel="Відкрити сегмент лікування"></nz-option>
+      </nz-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item *ngIf="form.get('outcomeKind')?.value === 'CARE_SEGMENT'">
+    <nz-form-label>Тип сегмента</nz-form-label>
+    <nz-form-control>
+      <nz-select formControlName="outcomeType">
+        <nz-option *ngFor="let item of segmentTypes" [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+      </nz-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item *ngIf="form.get('outcomeKind')?.value === 'CONSULTATION' || form.get('outcomeKind')?.value === 'EXAM'">
+    <nz-form-label>Дата наступної дії</nz-form-label>
+    <nz-form-control>
+      <nz-date-picker formControlName="outcomeScheduledDate" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item *ngIf="form.get('outcomeKind')?.value && form.get('outcomeKind')?.value !== 'NONE'">
+    <nz-form-label>Примітка до наступної дії</nz-form-label>
+    <nz-form-control>
+      <textarea nz-input formControlName="outcomeNotes" rows="2"></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="form-actions">
+    <button nz-button type="button" (click)="cancel()" [disabled]="loading">Скасувати</button>
+    <button nz-button nzType="primary" type="button" [nzLoading]="loading" (click)="submit()">Зберегти</button>
+  </div>
+</form>

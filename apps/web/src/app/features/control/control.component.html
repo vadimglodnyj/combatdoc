@@ -4,19 +4,73 @@
   <nz-tabset>
     <nz-tab nzTitle="Стаціонар">
       <div class="tab-content">
-        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+        <nz-spin [nzSpinning]="hospitalLoading">
+          <nz-empty *ngIf="!hospitalLoading && hospital.length === 0" nzNotFoundContent="Немає відкритого стаціонару"></nz-empty>
+          <div class="tile-stack" *ngIf="hospital.length > 0">
+            <article class="data-tile" *ngFor="let item of hospital" (click)="viewEpisode(item.episodeId)">
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ segmentLabel(item.type) }}</h3>
+                <span class="data-tile__action">Епізод</span>
+              </div>
+              <p class="data-tile__meta">
+                {{ memberName(item.episode?.serviceMember) }}
+                · з {{ formatDate(item.dateFrom) }}
+                · {{ item.facility?.shortName || item.facility?.name || '—' }}
+              </p>
+            </article>
+          </div>
+        </nz-spin>
       </div>
     </nz-tab>
 
     <nz-tab nzTitle="Поранені">
       <div class="tab-content">
-        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+        <nz-spin [nzSpinning]="woundedLoading">
+          <nz-empty *ngIf="!woundedLoading && wounded.length === 0" nzNotFoundContent="Немає активних COMBAT епізодів"></nz-empty>
+          <div class="tile-stack" *ngIf="wounded.length > 0">
+            <article class="data-tile data-tile--combat" *ngFor="let episode of wounded" (click)="viewEpisode(episode.id)">
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>
+                <span class="data-tile__action">Переглянути</span>
+              </div>
+              <p class="data-tile__meta">
+                {{ memberName(episode.serviceMember) }} · 120 днів: {{ episode.continuousDays120 }}
+              </p>
+            </article>
+          </div>
+        </nz-spin>
       </div>
     </nz-tab>
 
     <nz-tab nzTitle="Поліклініка">
       <div class="tab-content">
-        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+        <div class="tab-toolbar">
+          <nz-date-picker
+            [(ngModel)]="plannedDate"
+            nzFormat="dd.MM.yyyy"
+            nzPlaceHolder="Дата"
+            (ngModelChange)="loadPlanned()"
+          ></nz-date-picker>
+          <button nz-button [nzLoading]="remindLoading" (click)="remindPlanned()">
+            Нагадати в Discord
+          </button>
+        </div>
+        <nz-spin [nzSpinning]="plannedLoading">
+          <nz-empty *ngIf="!plannedLoading && planned.length === 0" nzNotFoundContent="Немає запланованих консультацій"></nz-empty>
+          <div class="tile-stack" *ngIf="planned.length > 0">
+            <article class="data-tile" *ngFor="let item of planned" (click)="viewEpisode(item.episodeId)">
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ kindLabel(item.kind) }}</h3>
+                <span class="data-tile__action">Епізод</span>
+              </div>
+              <p class="data-tile__meta">
+                {{ memberName(item.episode?.serviceMember) }}
+                · {{ formatDate(item.scheduledDate) }}
+                · {{ item.facility?.shortName || item.facility?.name || 'без ЛПЗ' }}
+              </p>
+            </article>
+          </div>
+        </nz-spin>
       </div>
     </nz-tab>
 
@@ -28,7 +82,20 @@
 
     <nz-tab nzTitle="Довготривале">
       <div class="tab-content">
-        <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+        <nz-spin [nzSpinning]="longTermLoading">
+          <nz-empty *ngIf="!longTermLoading && longTerm.length === 0" nzNotFoundContent="Немає епізодів 90+ днів"></nz-empty>
+          <div class="tile-stack" *ngIf="longTerm.length > 0">
+            <article class="data-tile" *ngFor="let episode of longTerm" (click)="viewEpisode(episode.id)">
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>
+                <nz-tag [nzColor]="episode.continuousDays120 >= 120 ? 'red' : 'gold'">
+                  {{ episode.continuousDays120 }} дн.
+                </nz-tag>
+              </div>
+              <p class="data-tile__meta">{{ memberName(episode.serviceMember) }}</p>
+            </article>
+          </div>
+        </nz-spin>
       </div>
     </nz-tab>
 
@@ -59,7 +126,7 @@
             <article
               class="data-tile data-tile--combat"
               *ngFor="let episode of missingCerts"
-              (click)="viewEpisode(episode)"
+              (click)="viewEpisode(episode.id)"
             >
               <div class="data-tile__head">
                 <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>

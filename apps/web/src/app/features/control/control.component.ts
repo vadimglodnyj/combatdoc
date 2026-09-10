@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { EpisodeService } from '../../core/services/episode.service';
-import { Episode } from '../../core/models/service-member.model';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { EpisodeService } from '../../core/services/episode.service';
+import { ClinicalService } from '../../core/services/clinical.service';
+import { CareSegment, Consultation, Episode } from '../../core/models/service-member.model';
+import { careSegmentLabel, consultationKindLabel } from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-control',
@@ -13,16 +15,31 @@ import { uk } from 'date-fns/locale';
 })
 export class ControlComponent implements OnInit {
   missingCerts: Episode[] = [];
+  hospital: CareSegment[] = [];
+  wounded: Episode[] = [];
+  planned: Consultation[] = [];
+  plannedDate: Date | null = new Date();
+  longTerm: Episode[] = [];
   loading = false;
+  hospitalLoading = false;
+  woundedLoading = false;
+  plannedLoading = false;
+  remindLoading = false;
+  longTermLoading = false;
 
   constructor(
     private episodeService: EpisodeService,
+    private clinical: ClinicalService,
     private router: Router,
-    private message: NzMessageService
+    private message: NzMessageService,
   ) {}
 
   ngOnInit(): void {
     this.loadMissingCerts();
+    this.loadHospital();
+    this.loadWounded();
+    this.loadPlanned();
+    this.loadLongTerm();
   }
 
   loadMissingCerts(): void {
@@ -39,13 +56,88 @@ export class ControlComponent implements OnInit {
     });
   }
 
+  loadHospital(): void {
+    this.hospitalLoading = true;
+    this.clinical.listSegments({ type: 'HOSP', active: true, take: 100 }).subscribe({
+      next: (res) => {
+        this.hospital = res.items;
+        this.hospitalLoading = false;
+      },
+      error: () => (this.hospitalLoading = false),
+    });
+  }
+
+  loadWounded(): void {
+    this.woundedLoading = true;
+    this.episodeService.findAll({ nature: 'COMBAT', isActive: true, take: 100 }).subscribe({
+      next: (res) => {
+        this.wounded = res.data;
+        this.woundedLoading = false;
+      },
+      error: () => (this.woundedLoading = false),
+    });
+  }
+
+  loadPlanned(): void {
+    this.plannedLoading = true;
+    this.clinical
+      .listConsultations({
+        status: 'PLANNED',
+        take: 100,
+        onDate: this.plannedDate ? format(this.plannedDate, 'yyyy-MM-dd') : undefined,
+        includeUnscheduled: true,
+      })
+      .subscribe({
+        next: (res) => {
+          this.planned = res.items;
+          this.plannedLoading = false;
+        },
+        error: () => (this.plannedLoading = false),
+      });
+  }
+
+  remindPlanned(): void {
+    this.remindLoading = true;
+    this.clinical
+      .remindPlanned({
+        onDate: this.plannedDate ? format(this.plannedDate, 'yyyy-MM-dd') : undefined,
+        includeUnscheduled: true,
+      })
+      .subscribe({
+        next: (res) => {
+          this.message.success(`Надіслано в Discord: ${res.sent}`);
+          this.remindLoading = false;
+        },
+        error: () => {
+          this.message.error('Не вдалося надіслати нагадування');
+          this.remindLoading = false;
+        },
+      });
+  }
+
+  loadLongTerm(): void {
+    this.longTermLoading = true;
+    this.episodeService.findAll({ isActive: true, take: 100 }).subscribe({
+      next: (res) => {
+        this.longTerm = res.data.filter((item) => (item.continuousDays120 || 0) >= 90);
+        this.longTermLoading = false;
+      },
+      error: () => (this.longTermLoading = false),
+    });
+  }
+
   formatDate(date?: string): string {
     if (!date) return '—';
     return format(new Date(date), 'dd.MM.yyyy', { locale: uk });
   }
 
-  viewEpisode(episode: Episode): void {
-    this.router.navigate(['/episodes', episode.id]);
+  viewEpisode(episodeId: string): void {
+    this.router.navigate(['/episodes', episodeId]);
+  }
+
+  memberName(member?: Episode['serviceMember']): string {
+    if (!member) return '—';
+    return `${member.lastName} ${member.firstName} ${member.middleName}`.trim();
   }
 
   getCertStatusColor(status?: string): string {
@@ -56,7 +148,6 @@ export class ControlComponent implements OnInit {
       case 'PENDING':
         return 'gold';
       case 'MISSING':
-        return 'red';
       case 'REJECTED':
         return 'red';
       default:
@@ -83,7 +174,9 @@ export class ControlComponent implements OnInit {
   getDaysSinceStart(episode: Episode): number {
     const start = new Date(episode.startDate);
     const now = new Date();
-    const diff = now.getTime() - start.getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
+    return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   }
+
+  segmentLabel = careSegmentLabel;
+  kindLabel = consultationKindLabel;
 }

@@ -19,6 +19,8 @@ export class ConsultationsListComponent implements OnInit {
   items: Consultation[] = [];
   loading = false;
   searchValue = '';
+  statusFilter: '' | 'PLANNED' | 'DONE' | 'CANCELLED' = '';
+  onDate: Date | null = null;
   page = 1;
   pageSize = 30;
   total = 0;
@@ -38,6 +40,9 @@ export class ConsultationsListComponent implements OnInit {
     this.clinicalService
       .listConsultations({
         search: this.searchValue.trim() || undefined,
+        status: this.statusFilter || undefined,
+        onDate: this.onDate ? format(this.onDate, 'yyyy-MM-dd') : undefined,
+        includeUnscheduled: this.onDate ? true : undefined,
         page: this.page,
         take: this.pageSize,
       })
@@ -56,6 +61,11 @@ export class ConsultationsListComponent implements OnInit {
   }
 
   onSearch(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  onFilterChange(): void {
     this.page = 1;
     this.load();
   }

@@ -1,5 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { parseOptionalBoolean } from '../../common/query-boolean';
 
 export class ListEpisodesQueryDto {
   @IsOptional()
@@ -11,12 +12,12 @@ export class ListEpisodesQueryDto {
   nature?: 'COMBAT' | 'SOMATIC';
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(parseOptionalBoolean)
   @IsBoolean()
   isActive?: boolean;
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(parseOptionalBoolean)
   @IsBoolean()
   missingCert?: boolean;
 

@@ -5,7 +5,7 @@ import { ClinicalService } from '../../core/services/clinical.service';
 import { CareSegment } from '../../core/models/service-member.model';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
-import { careSegmentLabel } from '../../core/utils/clinical-labels';
+import { careSegmentLabel, CARE_SEGMENT_TYPES } from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-segments-list',
@@ -15,6 +15,8 @@ export class SegmentsListComponent implements OnInit {
   items: CareSegment[] = [];
   loading = false;
   searchValue = '';
+  typeFilter = '';
+  activeFilter: '' | 'true' | 'false' = '';
   page = 1;
   pageSize = 30;
   total = 0;
@@ -34,6 +36,8 @@ export class SegmentsListComponent implements OnInit {
     this.clinicalService
       .listSegments({
         search: this.searchValue.trim() || undefined,
+        type: this.typeFilter || undefined,
+        active: this.activeFilter === '' ? undefined : this.activeFilter === 'true',
         page: this.page,
         take: this.pageSize,
       })
@@ -52,6 +56,11 @@ export class SegmentsListComponent implements OnInit {
   }
 
   onSearch(): void {
+    this.page = 1;
+    this.load();
+  }
+
+  onFilterChange(): void {
     this.page = 1;
     this.load();
   }
@@ -77,4 +86,5 @@ export class SegmentsListComponent implements OnInit {
   }
 
   typeLabel = careSegmentLabel;
+  types = CARE_SEGMENT_TYPES;
 }

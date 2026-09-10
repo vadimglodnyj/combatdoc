@@ -145,6 +145,9 @@
                   >
                     Довідка №5: {{ getCertStatusLabel(episode.injuryCertificate.status) }}
                   </nz-tag>
+                  <nz-tag [nzColor]="episode.continuousDays120 >= 120 ? 'red' : 'default'">
+                    120 днів: {{ episode.continuousDays120 }}
+                  </nz-tag>
                 </div>
                 <p class="data-tile__meta">
                   Початок: {{ formatDate(episode.startDate) }}
@@ -158,6 +161,12 @@
 
       <nz-tab nzTitle="Консультації">
         <div class="tab-content">
+          <div class="tab-header">
+            <button nz-button nzType="primary" (click)="openConsultationForm()">
+              <span nz-icon nzType="plus"></span>
+              Додати консультацію
+            </button>
+          </div>
           <nz-empty
             *ngIf="memberConsultations.length === 0"
             nzNotFoundContent="Немає консультацій"
@@ -195,6 +204,12 @@
 
       <nz-tab nzTitle="Сегменти лікування">
         <div class="tab-content">
+          <div class="tab-header">
+            <button nz-button nzType="primary" (click)="openSegmentForm()">
+              <span nz-icon nzType="plus"></span>
+              Відкрити сегмент
+            </button>
+          </div>
           <nz-empty
             *ngIf="memberSegments.length === 0"
             nzNotFoundContent="Немає сегментів лікування"

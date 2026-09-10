@@ -1,0 +1,76 @@
+<form nz-form [formGroup]="form" nzLayout="vertical">
+  <div class="form-grid">
+    <nz-form-item>
+      <nz-form-label nzRequired>Тип</nz-form-label>
+      <nz-form-control>
+        <nz-select formControlName="type" [nzDisabled]="mode === 'prolong'">
+          <nz-option *ngFor="let item of types" [nzValue]="item.value" [nzLabel]="item.label"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>ЛПЗ</nz-form-label>
+      <nz-form-control nzErrorTip="Оберіть заклад">
+        <nz-select formControlName="facilityId" nzShowSearch [nzDisabled]="mode === 'prolong'">
+          <nz-option
+            *ngFor="let item of facilities"
+            [nzValue]="item.id"
+            [nzLabel]="item.shortName ? item.shortName + ' — ' + item.name : item.name"
+          ></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="mode !== 'prolong'">
+      <nz-form-label nzRequired>Дата з</nz-form-label>
+      <nz-form-control>
+        <nz-date-picker formControlName="dateFrom" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>{{ mode === 'prolong' ? 'Нова дата до' : 'Дата до' }}</nz-form-label>
+      <nz-form-control>
+        <nz-date-picker formControlName="dateTo" nzFormat="dd.MM.yyyy" style="width: 100%"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-grid__wide" *ngIf="form.get('type')?.value === 'VLK_LEAVE' && mode !== 'prolong'">
+      <nz-form-label>Тривалість відпустки ВЛК</nz-form-label>
+      <nz-form-control>
+        <nz-space>
+          <button *nzSpaceItem nz-button type="button" (click)="setVlkDays(30)">30</button>
+          <button *nzSpaceItem nz-button type="button" (click)="setVlkDays(60)">60</button>
+          <button *nzSpaceItem nz-button type="button" (click)="setVlkDays(120)">120</button>
+        </nz-space>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>№ документа</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="documentNumber" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label>Діагноз</nz-form-label>
+      <nz-form-control>
+        <input nz-input formControlName="diagnosis" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="form-grid__wide">
+      <nz-form-label>Примітка</nz-form-label>
+      <nz-form-control>
+        <textarea nz-input formControlName="notes" rows="2"></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <div class="form-actions">
+    <button nz-button type="button" (click)="cancel()" [disabled]="loading">Скасувати</button>
+    <button nz-button nzType="primary" type="button" [nzLoading]="loading" (click)="submit()">Зберегти</button>
+  </div>
+</form>

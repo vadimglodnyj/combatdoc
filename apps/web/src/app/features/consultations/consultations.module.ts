@@ -9,6 +9,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 
 const routes: Routes = [{ path: '', component: ConsultationsListComponent }];
 
@@ -24,6 +26,8 @@ const routes: Routes = [{ path: '', component: ConsultationsListComponent }];
     NzSpinModule,
     NzEmptyModule,
     NzPaginationModule,
+    NzSelectModule,
+    NzDatePickerModule,
   ],
 })
 export class ConsultationsModule {}

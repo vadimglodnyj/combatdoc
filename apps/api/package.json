@@ -14,6 +14,7 @@
     "db:seed": "ts-node prisma/seed.ts",
     "db:import-turso": "ts-node prisma/import-turso-dump.ts",
     "test:turso-import": "ts-node prisma/turso-sql.selftest.ts && ts-node prisma/turso-units.selftest.ts && ts-node prisma/turso-care.selftest.ts",
+    "test:clinical": "ts-node src/common/continuous-days.selftest.ts && ts-node src/common/dispatch-message.selftest.ts",
     "db:generate": "prisma generate"
   },
   "dependencies": {

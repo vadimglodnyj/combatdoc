@@ -59,6 +59,13 @@
   .segments-card {
     margin-bottom: 24px;
   }
+
+  .tile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
 }
 
 @media (max-width: 768px) {

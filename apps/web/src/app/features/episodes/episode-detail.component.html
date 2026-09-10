@@ -49,6 +49,9 @@
           <nz-tag *ngIf="episode.paymentBlockedByCert" nzColor="red">
             ⚠️ Виплати заблоковано
           </nz-tag>
+          <nz-tag [nzColor]="episode.continuousDays120 >= 120 ? 'red' : 'default'">
+            120 днів: {{ episode.continuousDays120 }}
+          </nz-tag>
         </div>
       </div>
     </div>
@@ -75,10 +78,6 @@
       <div class="field">
         <dt class="field__label">Дата завершення</dt>
         <dd class="field__value">{{ formatDate(episode.endDate) }}</dd>
-      </div>
-      <div class="field">
-        <dt class="field__label">120-денний лічильник</dt>
-        <dd class="field__value">{{ episode.continuousDays120 }} днів</dd>
       </div>
     </dl>
   </nz-card>
@@ -168,10 +167,16 @@
   </nz-card>
 
   <!-- Consultations -->
-  <nz-card class="consultations-card" nzTitle="Консультації">
+  <nz-card class="consultations-card" nzTitle="Консультації" [nzExtra]="consultExtra">
+    <ng-template #consultExtra>
+      <button nz-button nzType="primary" nzSize="small" (click)="openConsultationForm()">
+        <span nz-icon nzType="plus"></span>
+        Додати
+      </button>
+    </ng-template>
     <nz-empty *ngIf="consultations.length === 0" nzNotFoundContent="Немає консультацій"></nz-empty>
     <div class="tile-stack" *ngIf="consultations.length > 0">
-      <article class="data-tile data-tile--static" *ngFor="let item of consultations">
+      <article class="data-tile" *ngFor="let item of consultations">
         <div class="data-tile__head">
           <h3 class="data-tile__title">
             {{ consultationKindLabel(item.kind) }}
@@ -190,20 +195,43 @@
           {{ formatDate(item.completedDate || item.scheduledDate) }}
           <span *ngIf="item.notes"> · {{ item.notes }}</span>
         </p>
+        <div class="tile-actions" *ngIf="isReal(item.id)" (click)="$event.stopPropagation()">
+          <button *ngIf="item.status === 'PLANNED'" nz-button nzSize="small" (click)="openConsultationForm(item, true)">
+            Завершити
+          </button>
+          <button nz-button nzSize="small" (click)="openConsultationForm(item)">Редагувати</button>
+          <button *ngIf="item.status === 'PLANNED'" nz-button nzSize="small" nzDanger (click)="cancelConsultation(item)">
+            Скасувати
+          </button>
+          <button nz-button nzSize="small" nzType="dashed" (click)="dispatchConsultation(item)">У чат 2</button>
+        </div>
       </article>
     </div>
   </nz-card>
 
   <!-- Care Segments -->
-  <nz-card class="segments-card" nzTitle="Сегменти лікування">
+  <nz-card class="segments-card" nzTitle="Сегменти лікування" [nzExtra]="segmentExtra">
+    <ng-template #segmentExtra>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="small"
+        [disabled]="hasOpenSegment"
+        (click)="openSegmentForm('open')"
+      >
+        <span nz-icon nzType="plus"></span>
+        Відкрити
+      </button>
+    </ng-template>
     <nz-empty *ngIf="segments.length === 0" nzNotFoundContent="Немає сегментів"></nz-empty>
     <div class="tile-stack" *ngIf="segments.length > 0">
-      <article class="data-tile data-tile--static" *ngFor="let item of segments">
+      <article class="data-tile" *ngFor="let item of segments">
         <div class="data-tile__head">
           <h3 class="data-tile__title">{{ careSegmentLabel(item.type) }}</h3>
         </div>
         <div class="data-tile__tags">
           <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
+          <nz-tag *ngIf="!item.dateTo" nzColor="green">Відкритий</nz-tag>
         </div>
         <p class="data-tile__meta">
           {{ formatDate(item.dateFrom) }}
@@ -211,6 +239,17 @@
           <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
           <span *ngIf="item.notes"> · {{ item.notes }}</span>
         </p>
+        <div class="tile-actions" *ngIf="isReal(item.id)" (click)="$event.stopPropagation()">
+          <button nz-button nzSize="small" (click)="openSegmentForm('edit', item)">Редагувати</button>
+          <button *ngIf="!item.dateTo" nz-button nzSize="small" (click)="closeSegment(item)">Закрити</button>
+          <button *ngIf="item.type === 'AMB'" nz-button nzSize="small" (click)="openSegmentForm('prolong', item)">
+            Продовжити
+          </button>
+          <button *ngIf="!item.dateTo" nz-button nzSize="small" (click)="openSegmentForm('transition', item)">
+            Перехід
+          </button>
+          <button nz-button nzSize="small" nzType="dashed" (click)="dispatchSegment(item)">У чати</button>
+        </div>
       </article>
     </div>
   </nz-card>

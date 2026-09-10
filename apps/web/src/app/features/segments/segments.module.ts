@@ -9,6 +9,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 const routes: Routes = [{ path: '', component: SegmentsListComponent }];
 
@@ -24,6 +25,7 @@ const routes: Routes = [{ path: '', component: SegmentsListComponent }];
     NzSpinModule,
     NzEmptyModule,
     NzPaginationModule,
+    NzSelectModule,
   ],
 })
 export class SegmentsModule {}

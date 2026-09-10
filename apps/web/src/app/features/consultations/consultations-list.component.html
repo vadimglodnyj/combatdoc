@@ -15,6 +15,25 @@
     </ng-template>
   </div>
 
+  <div class="page-list__filters">
+    <nz-select
+      [(ngModel)]="statusFilter"
+      style="min-width: 160px"
+      (ngModelChange)="onFilterChange()"
+    >
+      <nz-option nzValue="" nzLabel="Усі статуси"></nz-option>
+      <nz-option nzValue="PLANNED" nzLabel="Заплановано"></nz-option>
+      <nz-option nzValue="DONE" nzLabel="Виконано"></nz-option>
+      <nz-option nzValue="CANCELLED" nzLabel="Скасовано"></nz-option>
+    </nz-select>
+    <nz-date-picker
+      [(ngModel)]="onDate"
+      nzFormat="dd.MM.yyyy"
+      nzPlaceHolder="На дату"
+      (ngModelChange)="onFilterChange()"
+    ></nz-date-picker>
+  </div>
+
   <nz-spin [nzSpinning]="loading">
     <p class="page-list__meta" *ngIf="!loading && total > 0">{{ total }} консультацій</p>
     <nz-empty *ngIf="!loading && items.length === 0" nzNotFoundContent="Немає консультацій"></nz-empty>

@@ -1,3 +1,14 @@
+export const CARE_SEGMENT_TYPES: Array<{ value: string; label: string }> = [
+  { value: 'HOSP', label: 'Стаціонар' },
+  { value: 'DAY', label: 'Денний стаціонар' },
+  { value: 'AMB', label: 'Поліклініка' },
+  { value: 'MPBR', label: 'МПБр' },
+  { value: 'REHAB', label: 'Реабілітація' },
+  { value: 'ABROAD', label: 'За кордоном' },
+  { value: 'PHYS', label: 'Звільнення за фіз.' },
+  { value: 'VLK_LEAVE', label: 'Відпустка ВЛК' },
+];
+
 export const CARE_SEGMENT_LABELS: Record<string, string> = {
   HOSP: 'Стаціонар',
   DAY: 'Денний стаціонар',

@@ -6,6 +6,8 @@ import { ServiceMember, Episode, CreateEpisodeDto, Consultation, CareSegment } f
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { MemberFormComponent } from './member-form.component';
+import { ConsultationFormComponent } from '../clinical/consultation-form.component';
+import { SegmentFormComponent } from '../clinical/segment-form.component';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { formatUnitLabel } from '../../core/utils/format-unit';
@@ -208,6 +210,46 @@ export class MemberDetailComponent implements OnInit {
   consultationStatusLabel = consultationStatusLabel;
   consultationStatusColor = consultationStatusColor;
   careSegmentLabel = careSegmentLabel;
+
+  private targetEpisode(): Episode | undefined {
+    return this.episodes.find((item) => item.isActive) || this.episodes[0];
+  }
+
+  openConsultationForm(): void {
+    const episode = this.targetEpisode();
+    if (!episode) {
+      this.message.warning('Спочатку створіть епізод');
+      return;
+    }
+    const ref = this.modal.create({
+      nzTitle: 'Нова консультація',
+      nzContent: ConsultationFormComponent,
+      nzData: { episodeId: episode.id },
+      nzFooter: null,
+      nzWidth: window.innerWidth < 768 ? '100%' : 640,
+    });
+    ref.afterClose.subscribe((ok) => {
+      if (ok && this.member) this.loadEpisodes(this.member.id);
+    });
+  }
+
+  openSegmentForm(): void {
+    const episode = this.targetEpisode();
+    if (!episode) {
+      this.message.warning('Спочатку створіть епізод');
+      return;
+    }
+    const ref = this.modal.create({
+      nzTitle: 'Відкрити сегмент',
+      nzContent: SegmentFormComponent,
+      nzData: { episodeId: episode.id, diagnosis: episode.diagnosis, mode: 'open' },
+      nzFooter: null,
+      nzWidth: window.innerWidth < 768 ? '100%' : 640,
+    });
+    ref.afterClose.subscribe((ok) => {
+      if (ok && this.member) this.loadEpisodes(this.member.id);
+    });
+  }
 
   loadEpisodes(serviceMemberId: string): void {
     this.episodesLoading = true;
