@@ -20,6 +20,7 @@ export class EpisodeService {
     missingCert?: boolean;
     skip?: number;
     take?: number;
+    search?: string;
   }): Observable<{ data: Episode[]; total: number; skip: number; take: number }> {
     let params = new HttpParams();
     if (query) {

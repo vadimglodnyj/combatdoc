@@ -13,6 +13,59 @@ export interface Unit {
   sortOrder: number;
 }
 
+export interface Facility {
+  id: string;
+  code: string;
+  name: string;
+  shortName?: string;
+}
+
+export interface PractitionerRole {
+  id: string;
+  code: string;
+  name: string;
+}
+
+export interface Consultation {
+  id: string;
+  episodeId: string;
+  kind: 'VISIT' | 'EXAM';
+  status: 'PLANNED' | 'DONE' | 'CANCELLED';
+  facilityId: string;
+  practitionerRoleId: string;
+  scheduledDate?: string;
+  completedDate?: string;
+  notes?: string;
+  facility?: Facility;
+  practitionerRole?: PractitionerRole;
+  episode?: Episode;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CareSegment {
+  id: string;
+  episodeId: string;
+  type: 'HOSP' | 'DAY' | 'AMB' | 'MPBR' | 'REHAB' | 'ABROAD' | 'PHYS' | 'VLK_LEAVE';
+  dateFrom: string;
+  dateTo?: string;
+  facilityId: string;
+  documentNumber?: string;
+  diagnosis?: string;
+  notes?: string;
+  facility?: Facility;
+  episode?: Episode;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClinicalPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  take: number;
+}
+
 export interface Episode {
   id: string;
   serviceMemberId: string;
@@ -24,8 +77,8 @@ export interface Episode {
   continuousDays120: number;
   serviceMember?: ServiceMember;
   injuryCertificate?: InjuryCertificate;
-  consultations?: any[];
-  careSegments?: any[];
+  consultations?: Consultation[];
+  careSegments?: CareSegment[];
   paymentBlockedByCert?: boolean;
   createdAt: string;
   updatedAt: string;

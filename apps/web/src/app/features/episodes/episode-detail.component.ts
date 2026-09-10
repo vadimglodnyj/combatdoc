@@ -1,12 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EpisodeService } from '../../core/services/episode.service';
-import { Episode, InjuryCertificate } from '../../core/models/service-member.model';
+import { Episode, InjuryCertificate, Consultation, CareSegment } from '../../core/models/service-member.model';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { formatUnitLabel } from '../../core/utils/format-unit';
+import {
+  careSegmentLabel,
+  consultationKindLabel,
+  consultationStatusColor,
+  consultationStatusLabel,
+  looksLikeConsultationTitle,
+  segmentTypeFromTitle,
+} from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-episode-detail',
@@ -69,6 +77,52 @@ export class EpisodeDetailComponent implements OnInit {
       this.episode?.serviceMember?.unitShortName,
     );
   }
+
+  get consultations(): Consultation[] {
+    const nested = this.episode?.consultations || [];
+    if (nested.length || !this.episode || !looksLikeConsultationTitle(this.episode.diagnosis)) {
+      return nested;
+    }
+    return [
+      {
+        id: `from-episode-${this.episode.id}`,
+        episodeId: this.episode.id,
+        kind: 'VISIT',
+        status: this.episode.isActive ? 'PLANNED' : 'DONE',
+        facilityId: '',
+        practitionerRoleId: '',
+        completedDate: this.episode.endDate || this.episode.startDate,
+        notes: this.episode.diagnosis,
+        createdAt: this.episode.createdAt,
+        updatedAt: this.episode.updatedAt,
+      },
+    ];
+  }
+
+  get segments(): CareSegment[] {
+    const nested = this.episode?.careSegments || [];
+    if (nested.length || !this.episode) return nested;
+    const type = segmentTypeFromTitle(this.episode.diagnosis);
+    if (!type) return nested;
+    return [
+      {
+        id: `from-episode-${this.episode.id}`,
+        episodeId: this.episode.id,
+        type: type as CareSegment['type'],
+        dateFrom: this.episode.startDate,
+        dateTo: this.episode.endDate,
+        facilityId: '',
+        diagnosis: this.episode.diagnosis,
+        createdAt: this.episode.createdAt,
+        updatedAt: this.episode.updatedAt,
+      },
+    ];
+  }
+
+  consultationKindLabel = consultationKindLabel;
+  consultationStatusLabel = consultationStatusLabel;
+  consultationStatusColor = consultationStatusColor;
+  careSegmentLabel = careSegmentLabel;
 
   closeEpisode(): void {
     if (!this.episode) return;

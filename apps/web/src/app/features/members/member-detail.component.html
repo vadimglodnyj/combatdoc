@@ -158,13 +158,69 @@
 
       <nz-tab nzTitle="Консультації">
         <div class="tab-content">
-          <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+          <nz-empty
+            *ngIf="memberConsultations.length === 0"
+            nzNotFoundContent="Немає консультацій"
+          ></nz-empty>
+          <div class="tile-stack" *ngIf="memberConsultations.length > 0">
+            <article
+              class="data-tile"
+              *ngFor="let item of memberConsultations"
+              (click)="viewEpisode(item.episode!)"
+            >
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">
+                  {{ consultationKindLabel(item.kind) }}
+                  <span *ngIf="item.facility?.shortName || item.facility?.name">
+                    · {{ item.facility?.shortName || item.facility?.name }}
+                  </span>
+                </h3>
+                <span class="data-tile__action">Епізод</span>
+              </div>
+              <div class="data-tile__tags">
+                <nz-tag [nzColor]="consultationStatusColor(item.status)">
+                  {{ consultationStatusLabel(item.status) }}
+                </nz-tag>
+                <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
+              </div>
+              <p class="data-tile__meta">
+                {{ formatDate(item.completedDate || item.scheduledDate) }}
+                <span *ngIf="item.practitionerRole?.name"> · {{ item.practitionerRole?.name }}</span>
+                <span *ngIf="item.notes"> · {{ item.notes }}</span>
+              </p>
+            </article>
+          </div>
         </div>
       </nz-tab>
 
       <nz-tab nzTitle="Сегменти лікування">
         <div class="tab-content">
-          <nz-empty nzNotFoundContent="Функціонал буде додано"></nz-empty>
+          <nz-empty
+            *ngIf="memberSegments.length === 0"
+            nzNotFoundContent="Немає сегментів лікування"
+          ></nz-empty>
+          <div class="tile-stack" *ngIf="memberSegments.length > 0">
+            <article
+              class="data-tile"
+              *ngFor="let item of memberSegments"
+              (click)="viewEpisode(item.episode!)"
+            >
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ careSegmentLabel(item.type) }}</h3>
+                <span class="data-tile__action">Епізод</span>
+              </div>
+              <div class="data-tile__tags">
+                <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
+                <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
+              </div>
+              <p class="data-tile__meta">
+                {{ formatDate(item.dateFrom) }}
+                <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+                <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
+                <span *ngIf="item.notes"> · {{ item.notes }}</span>
+              </p>
+            </article>
+          </div>
         </div>
       </nz-tab>
 

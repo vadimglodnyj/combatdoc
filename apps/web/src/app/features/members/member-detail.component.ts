@@ -2,13 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServiceMemberService } from '../../core/services/service-member.service';
 import { EpisodeService } from '../../core/services/episode.service';
-import { ServiceMember, Episode, CreateEpisodeDto } from '../../core/models/service-member.model';
+import { ServiceMember, Episode, CreateEpisodeDto, Consultation, CareSegment } from '../../core/models/service-member.model';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { MemberFormComponent } from './member-form.component';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { formatUnitLabel } from '../../core/utils/format-unit';
+import {
+  careSegmentLabel,
+  consultationKindLabel,
+  consultationStatusColor,
+  consultationStatusLabel,
+  looksLikeConsultationTitle,
+  segmentTypeFromTitle,
+} from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-member-detail',
@@ -146,9 +154,64 @@ export class MemberDetailComponent implements OnInit {
     return this.episodes.filter((e) => e.isActive).length;
   }
 
+  get memberConsultations(): Consultation[] {
+    const nested = this.episodes.flatMap((episode) =>
+      (episode.consultations || []).map((item) => ({ ...item, episode })),
+    );
+    const synthetic = this.episodes
+      .filter(
+        (episode) =>
+          looksLikeConsultationTitle(episode.diagnosis) && !(episode.consultations || []).length,
+      )
+      .map((episode) => ({
+        id: `from-episode-${episode.id}`,
+        episodeId: episode.id,
+        kind: 'VISIT' as const,
+        status: episode.isActive ? ('PLANNED' as const) : ('DONE' as const),
+        facilityId: '',
+        practitionerRoleId: '',
+        completedDate: episode.endDate || episode.startDate,
+        notes: episode.diagnosis,
+        episode,
+        createdAt: episode.createdAt,
+        updatedAt: episode.updatedAt,
+      }));
+    return [...nested, ...synthetic];
+  }
+
+  get memberSegments(): CareSegment[] {
+    const nested = this.episodes.flatMap((episode) =>
+      (episode.careSegments || []).map((item) => ({ ...item, episode })),
+    );
+    const synthetic: CareSegment[] = [];
+    for (const episode of this.episodes) {
+      if ((episode.careSegments || []).length) continue;
+      const type = segmentTypeFromTitle(episode.diagnosis) as CareSegment['type'] | null;
+      if (!type) continue;
+      synthetic.push({
+        id: `from-episode-${episode.id}`,
+        episodeId: episode.id,
+        type,
+        dateFrom: episode.startDate,
+        dateTo: episode.endDate,
+        facilityId: '',
+        diagnosis: episode.diagnosis,
+        episode,
+        createdAt: episode.createdAt,
+        updatedAt: episode.updatedAt,
+      });
+    }
+    return [...nested, ...synthetic];
+  }
+
+  consultationKindLabel = consultationKindLabel;
+  consultationStatusLabel = consultationStatusLabel;
+  consultationStatusColor = consultationStatusColor;
+  careSegmentLabel = careSegmentLabel;
+
   loadEpisodes(serviceMemberId: string): void {
     this.episodesLoading = true;
-    this.episodeService.findAll({ serviceMemberId }).subscribe({
+    this.episodeService.findAll({ serviceMemberId, take: 200 }).subscribe({
       next: (response) => {
         this.episodes = response.data;
         this.episodesLoading = false;

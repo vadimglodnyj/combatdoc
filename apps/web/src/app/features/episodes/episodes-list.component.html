@@ -1,0 +1,59 @@
+<div class="page-list">
+  <div class="page-list__header">
+    <h1>Епізоди</h1>
+    <nz-input-group nzSearch [nzAddOnAfter]="suffix">
+      <input
+        type="text"
+        nz-input
+        placeholder="Пошук за ПІБ або діагнозом"
+        [(ngModel)]="searchValue"
+        (keyup.enter)="onSearch()"
+      />
+    </nz-input-group>
+    <ng-template #suffix>
+      <button nz-button nzType="primary" (click)="onSearch()">Пошук</button>
+    </ng-template>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <p class="page-list__meta" *ngIf="!loading && total > 0">{{ total }} епізодів</p>
+    <nz-empty *ngIf="!loading && episodes.length === 0" nzNotFoundContent="Немає епізодів"></nz-empty>
+
+    <div class="tile-stack" *ngIf="episodes.length > 0">
+      <article
+        class="data-tile"
+        *ngFor="let episode of episodes"
+        [class.data-tile--combat]="episode.nature === 'COMBAT'"
+        [class.data-tile--somatic]="episode.nature === 'SOMATIC'"
+        [class.data-tile--muted]="!episode.isActive"
+        (click)="viewEpisode(episode)"
+      >
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>
+          <span class="data-tile__action">Переглянути</span>
+        </div>
+        <div class="data-tile__tags">
+          <nz-tag [nzColor]="episode.nature === 'COMBAT' ? 'red' : 'blue'">
+            {{ episode.nature === 'COMBAT' ? 'Бойова' : 'Небойова' }}
+          </nz-tag>
+          <nz-tag [nzColor]="episode.isActive ? 'green' : 'default'">
+            {{ episode.isActive ? 'Активний' : 'Завершений' }}
+          </nz-tag>
+        </div>
+        <p class="data-tile__meta">
+          {{ memberName(episode) }} · {{ formatDate(episode.startDate) }}
+          <span *ngIf="episode.endDate"> — {{ formatDate(episode.endDate) }}</span>
+        </p>
+      </article>
+    </div>
+
+    <div class="page-list__pager" *ngIf="total > 20">
+      <nz-pagination
+        [nzPageIndex]="page"
+        [nzPageSize]="pageSize"
+        [nzTotal]="total"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+      ></nz-pagination>
+    </div>
+  </nz-spin>
+</div>

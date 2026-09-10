@@ -13,7 +13,7 @@
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
     "db:import-turso": "ts-node prisma/import-turso-dump.ts",
-    "test:turso-import": "ts-node prisma/turso-sql.selftest.ts && ts-node prisma/turso-units.selftest.ts",
+    "test:turso-import": "ts-node prisma/turso-sql.selftest.ts && ts-node prisma/turso-units.selftest.ts && ts-node prisma/turso-care.selftest.ts",
     "db:generate": "prisma generate"
   },
   "dependencies": {

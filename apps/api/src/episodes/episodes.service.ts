@@ -89,6 +89,16 @@ export class EpisodesService {
       ];
     }
 
+    const search = query.search?.trim();
+    if (search) {
+      where.OR = [
+        { diagnosis: { contains: search, mode: 'insensitive' } },
+        { serviceMember: { lastName: { contains: search, mode: 'insensitive' } } },
+        { serviceMember: { firstName: { contains: search, mode: 'insensitive' } } },
+        { serviceMember: { middleName: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
     const [episodes, total] = await Promise.all([
       this.prisma.episode.findMany({
         where,
@@ -100,8 +110,12 @@ export class EpisodesService {
             },
           },
           injuryCertificate: true,
-          consultations: true,
-          careSegments: true,
+          consultations: {
+            include: { facility: true, practitionerRole: true },
+          },
+          careSegments: {
+            include: { facility: true },
+          },
         },
         orderBy: {
           startDate: 'desc',
@@ -137,7 +151,9 @@ export class EpisodesService {
             practitionerRole: true,
           },
         },
-        careSegments: true,
+        careSegments: {
+          include: { facility: true },
+        },
         vlkDecisions: true,
       },
     });

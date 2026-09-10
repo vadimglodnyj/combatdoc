@@ -18,6 +18,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 import { EpisodesListComponent } from './episodes-list.component';
 import { EpisodeDetailComponent } from './episode-detail.component';
@@ -48,6 +49,7 @@ const routes: Routes = [
     NzEmptyModule,
     NzDividerModule,
     NzPopconfirmModule,
+    NzPaginationModule,
   ],
 })
 export class EpisodesModule {}

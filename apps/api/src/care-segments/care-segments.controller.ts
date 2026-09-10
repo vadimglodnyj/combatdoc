@@ -1,16 +1,15 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CareSegmentsService } from './care-segments.service';
+import { ListClinicalQueryDto } from '../consultations/dto/list-clinical-query.dto';
 
 @Controller('care-segments')
 @UseGuards(JwtAuthGuard)
 export class CareSegmentsController {
-  @Get()
-  findAll() {
-    return { message: 'Care segments list - to be implemented' };
-  }
+  constructor(private readonly careSegmentsService: CareSegmentsService) {}
 
-  @Post()
-  create() {
-    return { message: 'Care segment creation - to be implemented' };
+  @Get()
+  findAll(@Query() query: ListClinicalQueryDto) {
+    return this.careSegmentsService.findAll(query);
   }
 }

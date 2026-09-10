@@ -21,6 +21,10 @@ export class ListEpisodesQueryDto {
   missingCert?: boolean;
 
   @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))
   skip?: number;
 

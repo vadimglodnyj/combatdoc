@@ -72,8 +72,12 @@ export class ServiceMembersService {
         episodes: {
           orderBy: { startDate: 'desc' },
           include: {
-            consultations: { take: 5 },
-            careSegments: { take: 5 },
+            consultations: {
+              include: { facility: true, practitionerRole: true },
+            },
+            careSegments: {
+              include: { facility: true },
+            },
             injuryCertificate: true,
           },
         },

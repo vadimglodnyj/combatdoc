@@ -62,15 +62,11 @@
             {{ episode.serviceMember?.firstName }}
             {{ episode.serviceMember?.middleName }}
           </a>
+          <span *ngIf="episode.serviceMember?.rank?.name">
+            · {{ episode.serviceMember?.rank?.name }}
+          </span>
+          <span *ngIf="formatUnit() !== '—'"> · {{ formatUnit() }}</span>
         </dd>
-      </div>
-      <div class="field">
-        <dt class="field__label">Звання</dt>
-        <dd class="field__value">{{ episode.serviceMember?.rank?.name || '—' }}</dd>
-      </div>
-      <div class="field">
-        <dt class="field__label">Підрозділ</dt>
-        <dd class="field__value">{{ formatUnit() }}</dd>
       </div>
       <div class="field">
         <dt class="field__label">Дата початку</dt>
@@ -83,14 +79,6 @@
       <div class="field">
         <dt class="field__label">120-денний лічильник</dt>
         <dd class="field__value">{{ episode.continuousDays120 }} днів</dd>
-      </div>
-      <div class="field">
-        <dt class="field__label">Консультації</dt>
-        <dd class="field__value">{{ episode.consultations?.length || 0 }}</dd>
-      </div>
-      <div class="field">
-        <dt class="field__label">Сегменти лікування</dt>
-        <dd class="field__value">{{ episode.careSegments?.length || 0 }}</dd>
       </div>
     </dl>
   </nz-card>
@@ -179,14 +167,52 @@
     </div>
   </nz-card>
 
-  <!-- Consultations placeholder -->
+  <!-- Consultations -->
   <nz-card class="consultations-card" nzTitle="Консультації">
-    <nz-empty nzNotFoundContent="Немає консультацій"></nz-empty>
+    <nz-empty *ngIf="consultations.length === 0" nzNotFoundContent="Немає консультацій"></nz-empty>
+    <div class="tile-stack" *ngIf="consultations.length > 0">
+      <article class="data-tile data-tile--static" *ngFor="let item of consultations">
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">
+            {{ consultationKindLabel(item.kind) }}
+            <span *ngIf="item.facility?.shortName || item.facility?.name">
+              · {{ item.facility?.shortName || item.facility?.name }}
+            </span>
+          </h3>
+        </div>
+        <div class="data-tile__tags">
+          <nz-tag [nzColor]="consultationStatusColor(item.status)">
+            {{ consultationStatusLabel(item.status) }}
+          </nz-tag>
+          <nz-tag *ngIf="item.practitionerRole?.name">{{ item.practitionerRole?.name }}</nz-tag>
+        </div>
+        <p class="data-tile__meta">
+          {{ formatDate(item.completedDate || item.scheduledDate) }}
+          <span *ngIf="item.notes"> · {{ item.notes }}</span>
+        </p>
+      </article>
+    </div>
   </nz-card>
 
-  <!-- Care Segments placeholder -->
+  <!-- Care Segments -->
   <nz-card class="segments-card" nzTitle="Сегменти лікування">
-    <nz-empty nzNotFoundContent="Немає сегментів"></nz-empty>
+    <nz-empty *ngIf="segments.length === 0" nzNotFoundContent="Немає сегментів"></nz-empty>
+    <div class="tile-stack" *ngIf="segments.length > 0">
+      <article class="data-tile data-tile--static" *ngFor="let item of segments">
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">{{ careSegmentLabel(item.type) }}</h3>
+        </div>
+        <div class="data-tile__tags">
+          <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
+        </div>
+        <p class="data-tile__meta">
+          {{ formatDate(item.dateFrom) }}
+          <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+          <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
+          <span *ngIf="item.notes"> · {{ item.notes }}</span>
+        </p>
+      </article>
+    </div>
   </nz-card>
 </div>
 

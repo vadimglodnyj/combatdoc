@@ -1,0 +1,49 @@
+<div class="page-list">
+  <div class="page-list__header">
+    <h1>Сегменти лікування</h1>
+    <nz-input-group nzSearch [nzAddOnAfter]="suffix">
+      <input
+        type="text"
+        nz-input
+        placeholder="Пошук за ПІБ, діагнозом або ЛПЗ"
+        [(ngModel)]="searchValue"
+        (keyup.enter)="onSearch()"
+      />
+    </nz-input-group>
+    <ng-template #suffix>
+      <button nz-button nzType="primary" (click)="onSearch()">Пошук</button>
+    </ng-template>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <p class="page-list__meta" *ngIf="!loading && total > 0">{{ total }} сегментів</p>
+    <nz-empty *ngIf="!loading && items.length === 0" nzNotFoundContent="Немає сегментів"></nz-empty>
+
+    <div class="tile-stack" *ngIf="items.length > 0">
+      <article class="data-tile" *ngFor="let item of items" (click)="open(item)">
+        <div class="data-tile__head">
+          <h3 class="data-tile__title">{{ typeLabel(item.type) }}</h3>
+          <span class="data-tile__action">Епізод</span>
+        </div>
+        <div class="data-tile__tags">
+          <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
+          <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
+        </div>
+        <p class="data-tile__meta">
+          {{ memberName(item) }} · {{ formatDate(item.dateFrom) }}
+          <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+          <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
+        </p>
+      </article>
+    </div>
+
+    <div class="page-list__pager" *ngIf="total > 20">
+      <nz-pagination
+        [nzPageIndex]="page"
+        [nzPageSize]="pageSize"
+        [nzTotal]="total"
+        (nzPageIndexChange)="onPageIndexChange($event)"
+      ></nz-pagination>
+    </div>
+  </nz-spin>
+</div>

@@ -1,16 +1,20 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ConsultationsService } from './consultations.service';
+import { ListClinicalQueryDto } from './dto/list-clinical-query.dto';
 
 @Controller('consultations')
 @UseGuards(JwtAuthGuard)
 export class ConsultationsController {
-  @Get()
-  findAll() {
-    return { message: 'Consultations list - to be implemented' };
-  }
+  constructor(private readonly consultationsService: ConsultationsService) {}
 
-  @Post()
-  create() {
-    return { message: 'Consultation creation - to be implemented' };
+  @Get()
+  findAll(@Query() query: ListClinicalQueryDto) {
+    return this.consultationsService.findAll(query);
   }
 }

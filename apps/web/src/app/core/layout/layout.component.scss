@@ -115,20 +115,20 @@ nz-layout {
 
 nz-content {
   margin-top: 64px; // Fixed header height
-  padding: 24px;
+  padding: 16px;
   min-height: calc(100vh - 64px);
   background: #f0f2f5;
 }
 
 .inner-content {
-  padding: 12px;
+  padding: 0;
   background: transparent;
-  min-height: calc(100vh - 88px);
+  min-height: calc(100vh - 96px);
 }
 
 @media (min-width: 768px) {
-  .inner-content {
-    padding: 24px;
+  nz-content {
+    padding: 16px 20px 24px;
   }
 }
 

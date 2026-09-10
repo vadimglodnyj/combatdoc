@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { PrismaClient, EpisodeNature, CareSegmentType } from '@prisma/client';
+import { PrismaClient, EpisodeNature } from '@prisma/client';
 import { parseDump, SqlRow } from './turso-sql';
 import {
   canReuseUnit,
@@ -9,6 +9,7 @@ import {
   normalizeKey,
   uniqueCode,
 } from './turso-units';
+import { looksLikeConsultation, mapCare } from './turso-care';
 
 const prisma = new PrismaClient();
 
@@ -34,28 +35,6 @@ const RANK_ALIASES: Record<string, string> = {
   полковник: 'COL',
 };
 
-const CARE_MAP: Record<string, CareSegmentType | 'CONSULTATION' | 'SKIP'> = {
-  inpatient: 'HOSP',
-  hosp: 'HOSP',
-  hospital: 'HOSP',
-  day_hospital: 'DAY',
-  day: 'DAY',
-  outpatient: 'AMB',
-  amb: 'AMB',
-  rehab: 'REHAB',
-  abroad: 'ABROAD',
-  mpbr: 'MPBR',
-  mpb: 'CONSULTATION',
-  phys_exempt: 'PHYS',
-  phys: 'PHYS',
-  vlk: 'SKIP',
-  vlk_leave: 'VLK_LEAVE',
-  vacation: 'VLK_LEAVE',
-  referral: 'CONSULTATION',
-  consultation: 'CONSULTATION',
-  exam: 'CONSULTATION',
-};
-
 type Stats = {
   membersCreated: number;
   membersUpdated: number;
@@ -66,6 +45,7 @@ type Stats = {
   certs: number;
   segments: number;
   consultations: number;
+  visitsSkipped: number;
   journal: number;
 };
 
@@ -133,11 +113,6 @@ function mapServiceType(raw: string): string {
   if (text.includes('строков')) return 'Строкова';
   if (text.includes('контракт')) return 'Контракт';
   return raw || 'Контракт';
-}
-
-function mapCare(raw: string): CareSegmentType | 'CONSULTATION' | 'SKIP' {
-  const key = normalizeKey(raw).replace(/\s/g, '_');
-  return CARE_MAP[key] || CARE_MAP[raw.toLowerCase()] || 'SKIP';
 }
 
 export function resolveDumpPath(dir = DEFAULT_DUMP_DIR, explicit?: string): string {
@@ -220,11 +195,14 @@ async function main() {
     certs: 0,
     segments: 0,
     consultations: 0,
+    visitsSkipped: 0,
     journal: 0,
   };
 
   const memberByOldId = new Map<string, string>();
   const episodeByOldTreatmentId = new Map<string, string>();
+  const lastEpisodeByMember = new Map<string, string>();
+  const episodeMeta = new Map<string, { memberId: string; diagnosis: string; startDate: Date }>();
 
   function resolveRankId(raw: string): string {
     const key = normalizeKey(raw);
@@ -373,6 +351,8 @@ async function main() {
     });
     if (existing) {
       episodeByOldTreatmentId.set(cell(row, 'id'), existing.id);
+      lastEpisodeByMember.set(memberId, existing.id);
+      episodeMeta.set(existing.id, { memberId, diagnosis, startDate });
       stats.episodesSkipped += 1;
       continue;
     }
@@ -388,6 +368,8 @@ async function main() {
       },
     });
     episodeByOldTreatmentId.set(cell(row, 'id'), episode.id);
+    lastEpisodeByMember.set(memberId, episode.id);
+    episodeMeta.set(episode.id, { memberId, diagnosis, startDate });
     stats.episodesCreated += 1;
 
     if (nature === 'COMBAT') {
@@ -440,27 +422,50 @@ async function main() {
   }
 
   for (const row of visits) {
-    const episodeId = episodeByOldTreatmentId.get(cell(row, 'treatment_id'));
-    if (!episodeId) continue;
-    const care = mapCare(cell(row, 'care_type', 'kind', 'type'));
-    const from = parseDate(cell(row, 'visit_date', 'date', 'start_on', 'leave_start', 'created_at'));
-    if (!from) continue;
+    const visitId = cell(row, 'id');
+    if (visitId) {
+      const already = await prisma.journalEntry.findFirst({
+        where: { metadata: { path: ['tursoVisitId'], equals: visitId } },
+      });
+      if (already) continue;
+    }
+
+    const treatmentId = cell(row, 'treatment_id');
+    let episodeId =
+      (treatmentId && treatmentId !== '0' ? episodeByOldTreatmentId.get(treatmentId) : undefined) ||
+      lastEpisodeByMember.get(memberByOldId.get(cell(row, 'patient_id')) || '');
+    if (!episodeId) {
+      stats.visitsSkipped += 1;
+      continue;
+    }
+
+    const care = mapCare(cell(row, 'care_type', 'kind', 'type', 'entry_type'));
+    const from =
+      parseDate(cell(row, 'visit_date', 'date', 'start_on', 'leave_start', 'created_at')) ||
+      episodeMeta.get(episodeId)?.startDate ||
+      null;
+    if (!from) {
+      stats.visitsSkipped += 1;
+      continue;
+    }
     const to = parseDate(cell(row, 'end_on', 'leave_end', 'closed_on'));
     const diagnosis = cell(row, 'diagnosis', 'title') || null;
     const notes = cell(row, 'note', 'notes') || null;
-    const lpz = cell(row, 'lpz', 'from_lpz');
+    const lpz = cell(row, 'lpz', 'from_lpz', 'facility', 'hospital');
     const facilityId = await resolveFacilityId(lpz);
 
     if (care === 'CONSULTATION') {
       await prisma.consultation.create({
         data: {
           episodeId,
-          kind: 'VISIT',
+          kind: /огляд|exam/.test(normalizeKey(cell(row, 'care_type', 'kind', 'title')))
+            ? 'EXAM'
+            : 'VISIT',
           status: 'DONE',
           facilityId,
           practitionerRoleId: defaultRole.id,
           completedDate: from,
-          notes: [lpz, notes].filter(Boolean).join(' · ') || null,
+          notes: [lpz, notes, diagnosis].filter(Boolean).join(' · ') || null,
         },
       });
       stats.consultations += 1;
@@ -479,7 +484,7 @@ async function main() {
       stats.segments += 1;
     }
 
-    let memberId = episodeMemberCache.get(episodeId);
+    let memberId = episodeMemberCache.get(episodeId) || episodeMeta.get(episodeId)?.memberId;
     if (!memberId) {
       memberId = (await prisma.episode.findUnique({ where: { id: episodeId } }))?.serviceMemberId;
       if (memberId) episodeMemberCache.set(episodeId, memberId);
@@ -491,10 +496,28 @@ async function main() {
         patientId: memberId,
         episodeId,
         userId: admin.id,
-        metadata: { tursoVisitId: cell(row, 'id'), lpz },
+        metadata: { tursoVisitId: visitId, lpz },
       },
     });
     stats.journal += 1;
+  }
+
+  for (const [episodeId, meta] of episodeMeta) {
+    if (!looksLikeConsultation(meta.diagnosis)) continue;
+    const existingCount = await prisma.consultation.count({ where: { episodeId } });
+    if (existingCount > 0) continue;
+    await prisma.consultation.create({
+      data: {
+        episodeId,
+        kind: 'VISIT',
+        status: 'DONE',
+        facilityId: defaultFacility.id,
+        practitionerRoleId: defaultRole.id,
+        completedDate: meta.startDate,
+        notes: meta.diagnosis,
+      },
+    });
+    stats.consultations += 1;
   }
 
   console.log('🎉 Імпорт завершено (дамп не змінювався і не комітиться):');
@@ -502,6 +525,11 @@ async function main() {
   if (stats.unitsCreated > 0) {
     console.log(
       'Підрозділи створено з полів unit_short / rank_unit дампу, не з сідових «Підрозділ 1–6». Повторіть імпорт, щоб оновити вже завантажені картки.',
+    );
+  }
+  if (stats.consultations > 0 || stats.segments > 0) {
+    console.log(
+      `Клінічні записи: консультації=${stats.consultations}, сегменти=${stats.segments}, пропущено візитів=${stats.visitsSkipped}.`,
     );
   }
 }
