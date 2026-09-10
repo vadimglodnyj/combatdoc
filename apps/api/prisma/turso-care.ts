@@ -50,3 +50,27 @@ export function looksLikeConsultation(title: string): boolean {
   const text = normalizeKey(title);
   return /консультац|огляд|направл|\bмпб\b|referral|consult|exam/.test(text);
 }
+
+/** Calendar day in local TZ so 09.09 00:00 and 09.09 10:00 collapse together. */
+export function dayKey(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function segmentDedupeKey(input: {
+  episodeId: string;
+  type: string;
+  dateFrom: Date | string;
+  dateTo?: Date | string | null;
+}): string {
+  return [
+    input.episodeId,
+    input.type,
+    dayKey(input.dateFrom),
+    input.dateTo ? dayKey(input.dateTo) : 'open',
+  ].join('|');
+}
+

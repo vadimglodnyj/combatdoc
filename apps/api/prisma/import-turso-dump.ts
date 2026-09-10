@@ -9,7 +9,8 @@ import {
   normalizeKey,
   uniqueCode,
 } from './turso-units';
-import { looksLikeConsultation, mapCare } from './turso-care';
+import { looksLikeConsultation, mapCare, segmentDedupeKey } from './turso-care';
+import { collapseDuplicateCareSegments } from './dedupe-care-segments';
 
 const prisma = new PrismaClient();
 
@@ -473,37 +474,29 @@ async function main() {
       });
       stats.consultations += 1;
     } else if (care !== 'SKIP') {
-      const existingSegment = await prisma.careSegment.findFirst({
-        where: {
-          episodeId,
-          type: care,
-          dateFrom: from,
-          facilityId,
-          dateTo: to,
-        },
+      const siblings = await prisma.careSegment.findMany({
+        where: { episodeId, type: care },
       });
-      if (existingSegment) {
+      const key = segmentDedupeKey({ episodeId, type: care, dateFrom: from, dateTo: to });
+      const duplicate = siblings.some((item) => segmentDedupeKey(item) === key);
+      const open = await prisma.careSegment.findFirst({
+        where: { episodeId, dateTo: null },
+      });
+      if (duplicate || (open && !to)) {
         stats.segmentsDeduped += 1;
       } else {
-        const open = await prisma.careSegment.findFirst({
-          where: { episodeId, dateTo: null },
+        await prisma.careSegment.create({
+          data: {
+            episodeId,
+            type: care,
+            dateFrom: from,
+            dateTo: to,
+            facilityId,
+            diagnosis,
+            notes,
+          },
         });
-        if (open && !to && open.type === care && open.facilityId === facilityId) {
-          stats.segmentsDeduped += 1;
-        } else {
-          await prisma.careSegment.create({
-            data: {
-              episodeId,
-              type: care,
-              dateFrom: from,
-              dateTo: to,
-              facilityId,
-              diagnosis,
-              notes,
-            },
-          });
-          stats.segments += 1;
-        }
+        stats.segments += 1;
       }
     }
 
@@ -544,23 +537,8 @@ async function main() {
     stats.consultations += 1;
   }
 
-  const allSegments = await prisma.careSegment.findMany({ orderBy: { createdAt: 'asc' } });
-  const seenKeys = new Set<string>();
-  for (const segment of allSegments) {
-    const key = [
-      segment.episodeId,
-      segment.type,
-      segment.dateFrom.toISOString().slice(0, 10),
-      segment.dateTo ? segment.dateTo.toISOString().slice(0, 10) : 'open',
-      segment.facilityId,
-    ].join('|');
-    if (seenKeys.has(key)) {
-      await prisma.careSegment.delete({ where: { id: segment.id } });
-      stats.segmentsDeduped += 1;
-      continue;
-    }
-    seenKeys.add(key);
-  }
+  const collapsed = await collapseDuplicateCareSegments(prisma);
+  stats.segmentsDeduped += collapsed;
 
   console.log('🎉 Імпорт завершено (дамп не змінювався і не комітиться):');
   console.log(JSON.stringify(stats, null, 2));

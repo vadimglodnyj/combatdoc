@@ -229,7 +229,9 @@
               </div>
               <div class="data-tile__tags">
                 <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
-                <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
+                <nz-tag *ngIf="item.episode?.diagnosis && item.episode?.diagnosis !== item.diagnosis">
+                  {{ item.episode?.diagnosis }}
+                </nz-tag>
               </div>
               <p class="data-tile__meta">
                 {{ formatDate(item.dateFrom) }}
