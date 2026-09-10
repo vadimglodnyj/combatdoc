@@ -9,6 +9,11 @@ coverage/
 .angular/
 apps/api/prisma/*.db
 
+# Local Turso / patient SQL dumps — never commit
+apps/api/prisma/*.sql
+apps/api/prisma/*.sqlite
+apps/api/prisma/*.sqlite3
+
 # Uploaded injury certificates and other runtime files must never be committed
 apps/api/uploads/
 

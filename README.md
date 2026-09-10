@@ -62,6 +62,11 @@ pnpm db:migrate
 pnpm db:seed
 cd ../..
 
+# 5б. (опційно) Імпорт старої Turso-БД. Дамп кладіть у apps/api/prisma
+# наприклад turso_journal.*.sql — файл у git НЕ комітиться.
+# pnpm db:import-turso
+
+
 # 6. Запустити dev-сервери (API + Web)
 pnpm dev
 ```
@@ -189,6 +194,7 @@ pnpm api:start           # Запустити продакшн
 pnpm db:migrate          # Виконати міграції
 pnpm db:studio           # Prisma Studio UI
 pnpm db:seed             # Заповнити початкові дані
+pnpm db:import-turso     # Імпорт локального Turso SQL-дампа (файл не в git)
 
 # Web
 pnpm web:dev             # Angular dev server
