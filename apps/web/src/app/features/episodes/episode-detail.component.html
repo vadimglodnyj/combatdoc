@@ -53,39 +53,51 @@
       </div>
     </div>
 
-    <nz-descriptions nzBordered [nzColumn]="3">
-      <nz-descriptions-item nzTitle="Військовослужбовець" [nzSpan]="3">
-        <a [routerLink]="['/members', episode.serviceMemberId]">
-          {{ episode.serviceMember?.lastName }}
-          {{ episode.serviceMember?.firstName }}
-          {{ episode.serviceMember?.middleName }}
-        </a>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Звання">
-        {{ episode.serviceMember?.rank?.name || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Підрозділ" [nzSpan]="2">
-        {{ episode.serviceMember?.unit?.name || '—' }}
-        <span *ngIf="episode.serviceMember?.unitShortName">
-          ({{ episode.serviceMember?.unitShortName }})
-        </span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата початку">
-        {{ formatDate(episode.startDate) }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата завершення" [nzSpan]="2">
-        {{ formatDate(episode.endDate) }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="120-денний лічильник">
-        {{ episode.continuousDays120 }} днів
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Консультації">
-        {{ episode.consultations?.length || 0 }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Сегменти лікування">
-        {{ episode.careSegments?.length || 0 }}
-      </nz-descriptions-item>
-    </nz-descriptions>
+    <dl class="field-list">
+      <div class="field field--wide">
+        <dt class="field__label">Військовослужбовець</dt>
+        <dd class="field__value">
+          <a [routerLink]="['/members', episode.serviceMemberId]">
+            {{ episode.serviceMember?.lastName }}
+            {{ episode.serviceMember?.firstName }}
+            {{ episode.serviceMember?.middleName }}
+          </a>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Звання</dt>
+        <dd class="field__value">{{ episode.serviceMember?.rank?.name || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Підрозділ</dt>
+        <dd class="field__value">
+          {{ episode.serviceMember?.unit?.name || '—' }}
+          <span *ngIf="episode.serviceMember?.unitShortName">
+            ({{ episode.serviceMember?.unitShortName }})
+          </span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата початку</dt>
+        <dd class="field__value">{{ formatDate(episode.startDate) }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата завершення</dt>
+        <dd class="field__value">{{ formatDate(episode.endDate) }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">120-денний лічильник</dt>
+        <dd class="field__value">{{ episode.continuousDays120 }} днів</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Консультації</dt>
+        <dd class="field__value">{{ episode.consultations?.length || 0 }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Сегменти лікування</dt>
+        <dd class="field__value">{{ episode.careSegments?.length || 0 }}</dd>
+      </div>
+    </dl>
   </nz-card>
 
   <!-- Injury Certificate Card (COMBAT only) -->

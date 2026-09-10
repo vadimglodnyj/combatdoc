@@ -43,7 +43,6 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -107,7 +106,6 @@ const icons: IconDefinition[] = [
     NzInputModule,
     NzButtonModule,
     NzCardModule,
-    NzTableModule,
     NzTagModule,
     NzMessageModule,
     NzSpinModule,

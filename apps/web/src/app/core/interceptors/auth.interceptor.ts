@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import {
   HttpErrorResponse,
   HttpEvent,
@@ -15,7 +15,7 @@ import { AuthService } from '../services/auth.service';
 export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private authService: AuthService,
-    private router: Router,
+    private injector: Injector,
   ) {}
 
   intercept(
@@ -32,7 +32,10 @@ export class AuthInterceptor implements HttpInterceptor {
         const isLoginRequest = req.url.includes('/auth/login');
         if (err.status === 401 && !isLoginRequest) {
           this.authService.logout();
-          void this.router.navigate(['/login']);
+          const router = this.injector.get(Router);
+          if (!router.url.startsWith('/login')) {
+            void router.navigate(['/login'], { replaceUrl: true });
+          }
         }
         return throwError(() => err);
       }),

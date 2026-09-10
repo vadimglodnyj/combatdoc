@@ -8,7 +8,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
-import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -39,7 +38,6 @@ const routes: Routes = [
     NzIconModule,
     NzTagModule,
     NzSpaceModule,
-    NzDescriptionsModule,
     NzAlertModule,
     NzUploadModule,
     NzModalModule,

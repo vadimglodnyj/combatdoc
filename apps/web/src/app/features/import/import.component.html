@@ -80,61 +80,60 @@
       </div>
     </div>
 
-    <nz-table
-      #previewTable
-      [nzData]="preview.rows"
-      [nzPageSize]="20"
-      [nzScroll]="{ x: '1200px' }"
-      class="preview-table"
-    >
-      <thead>
-        <tr>
-          <th nzWidth="60px"></th>
-          <th nzWidth="80px">Рядок</th>
-          <th nzWidth="200px">ПІБ</th>
-          <th>Звання</th>
-          <th>Підрозділ</th>
-          <th>Посада</th>
-          <th>Вид служби</th>
-          <th>Статус</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of previewTable.data" [class.error-row]="row.errors.length > 0">
-          <td>
-            <label
-              nz-checkbox
-              [nzChecked]="isRowSelected(row.rowNumber)"
-              [nzDisabled]="row.errors.length > 0"
-              (nzCheckedChange)="toggleRow(row.rowNumber)"
-            ></label>
-          </td>
-          <td>{{ row.rowNumber }}</td>
-          <td>{{ getFullName(row) }}</td>
-          <td>{{ row.rankActual || row.rankStaff || '—' }}</td>
-          <td>{{ row.unit || row.unitShort || '—' }}</td>
-          <td>{{ row.position || '—' }}</td>
-          <td>{{ row.serviceType || '—' }}</td>
-          <td>
-            <nz-tag *ngIf="row.errors.length === 0 && row.warnings.length === 0" nzColor="success">
-              Готовий
-            </nz-tag>
-            <nz-tag *ngIf="row.errors.length > 0" nzColor="error">
-              Помилка
-            </nz-tag>
-            <nz-tag *ngIf="row.errors.length === 0 && row.warnings.length > 0" nzColor="warning">
-              Попередження
-            </nz-tag>
-            <div *ngIf="row.errors.length > 0" class="error-messages">
-              <small *ngFor="let err of row.errors" class="error-text">{{ err }}</small>
-            </div>
-            <div *ngIf="row.warnings.length > 0" class="warning-messages">
-              <small *ngFor="let warn of row.warnings" class="warning-text">{{ warn }}</small>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </nz-table>
+    <div class="tile-stack preview-stack">
+      <article
+        class="data-tile data-tile--static"
+        *ngFor="let row of preview.rows"
+        [class.data-tile--error]="row.errors.length > 0"
+        [class.data-tile--muted]="row.errors.length > 0"
+      >
+        <div class="data-tile__head">
+          <label
+            nz-checkbox
+            [nzChecked]="isRowSelected(row.rowNumber)"
+            [nzDisabled]="row.errors.length > 0"
+            (nzCheckedChange)="toggleRow(row.rowNumber)"
+          >
+            <strong>{{ getFullName(row) }}</strong>
+          </label>
+          <nz-tag *ngIf="row.errors.length === 0 && row.warnings.length === 0" nzColor="success">
+            Готовий
+          </nz-tag>
+          <nz-tag *ngIf="row.errors.length > 0" nzColor="error">Помилка</nz-tag>
+          <nz-tag *ngIf="row.errors.length === 0 && row.warnings.length > 0" nzColor="warning">
+            Попередження
+          </nz-tag>
+        </div>
+        <dl class="field-list">
+          <div class="field">
+            <dt class="field__label">Рядок</dt>
+            <dd class="field__value">{{ row.rowNumber }}</dd>
+          </div>
+          <div class="field">
+            <dt class="field__label">Звання</dt>
+            <dd class="field__value">{{ row.rankActual || row.rankStaff || '—' }}</dd>
+          </div>
+          <div class="field">
+            <dt class="field__label">Підрозділ</dt>
+            <dd class="field__value">{{ row.unit || row.unitShort || '—' }}</dd>
+          </div>
+          <div class="field">
+            <dt class="field__label">Вид служби</dt>
+            <dd class="field__value">{{ row.serviceType || '—' }}</dd>
+          </div>
+          <div class="field field--wide">
+            <dt class="field__label">Посада</dt>
+            <dd class="field__value">{{ row.position || '—' }}</dd>
+          </div>
+        </dl>
+        <div *ngIf="row.errors.length > 0" class="error-messages">
+          <small *ngFor="let err of row.errors" class="error-text">{{ err }}</small>
+        </div>
+        <div *ngIf="row.warnings.length > 0" class="warning-messages">
+          <small *ngFor="let warn of row.warnings" class="warning-text">{{ warn }}</small>
+        </div>
+      </article>
+    </div>
 
     <div class="action-buttons">
       <button nz-button nzType="default" (click)="reset()">Скасувати</button>

@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -17,7 +16,6 @@ const routes: Routes = [{ path: '', component: ControlComponent }];
     CommonModule,
     RouterModule.forChild(routes),
     NzTabsModule,
-    NzTableModule,
     NzTagModule,
     NzEmptyModule,
     NzSpinModule,

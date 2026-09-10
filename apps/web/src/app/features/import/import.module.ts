@@ -7,7 +7,6 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
@@ -30,7 +29,6 @@ const routes: Routes = [{ path: '', component: ImportComponent }];
     NzUploadModule,
     NzButtonModule,
     NzIconModule,
-    NzTableModule,
     NzTagModule,
     NzAlertModule,
     NzCheckboxModule,

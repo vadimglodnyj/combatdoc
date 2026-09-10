@@ -55,53 +55,35 @@
             nzNotFoundContent="Всі COMBAT епізоди мають верифіковані довідки"
           ></nz-empty>
 
-          <nz-table
-            *ngIf="missingCerts.length > 0"
-            [nzData]="missingCerts"
-            [nzPageSize]="50"
-            nzSize="middle"
-          >
-            <thead>
-              <tr>
-                <th>Військовослужбовець</th>
-                <th>Звання</th>
-                <th>Діагноз</th>
-                <th>Дата початку</th>
-                <th>Днів</th>
-                <th>Статус довідки</th>
-                <th>Дії</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let episode of missingCerts">
-                <td>
-                  <a [routerLink]="['/members', episode.serviceMemberId]">
-                    {{ episode.serviceMember?.lastName }}
-                    {{ episode.serviceMember?.firstName }}
-                    {{ episode.serviceMember?.middleName }}
-                  </a>
-                </td>
-                <td>{{ episode.serviceMember?.rank?.name || '—' }}</td>
-                <td>{{ episode.diagnosis }}</td>
-                <td>{{ formatDate(episode.startDate) }}</td>
-                <td>
-                  <nz-tag [nzColor]="getDaysSinceStart(episode) > 30 ? 'red' : 'default'">
-                    {{ getDaysSinceStart(episode) }}
-                  </nz-tag>
-                </td>
-                <td>
-                  <nz-tag
-                    [nzColor]="getCertStatusColor(episode.injuryCertificate?.status)"
-                  >
-                    {{ getCertStatusLabel(episode.injuryCertificate?.status) }}
-                  </nz-tag>
-                </td>
-                <td>
-                  <a (click)="viewEpisode(episode)">Переглянути</a>
-                </td>
-              </tr>
-            </tbody>
-          </nz-table>
+          <div class="tile-stack" *ngIf="missingCerts.length > 0">
+            <article
+              class="data-tile data-tile--combat"
+              *ngFor="let episode of missingCerts"
+              (click)="viewEpisode(episode)"
+            >
+              <div class="data-tile__head">
+                <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>
+                <span class="data-tile__action">Переглянути</span>
+              </div>
+              <div class="data-tile__tags">
+                <nz-tag [nzColor]="getCertStatusColor(episode.injuryCertificate?.status)">
+                  {{ getCertStatusLabel(episode.injuryCertificate?.status) }}
+                </nz-tag>
+                <nz-tag [nzColor]="getDaysSinceStart(episode) > 30 ? 'red' : 'default'">
+                  {{ getDaysSinceStart(episode) }} дн.
+                </nz-tag>
+              </div>
+              <p class="data-tile__meta">
+                <a [routerLink]="['/members', episode.serviceMemberId]" (click)="$event.stopPropagation()">
+                  {{ episode.serviceMember?.lastName }}
+                  {{ episode.serviceMember?.firstName }}
+                  {{ episode.serviceMember?.middleName }}
+                </a>
+                · {{ episode.serviceMember?.rank?.name || '—' }}
+                · з {{ formatDate(episode.startDate) }}
+              </p>
+            </article>
+          </div>
         </nz-spin>
       </div>
     </nz-tab>

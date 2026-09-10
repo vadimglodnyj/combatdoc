@@ -121,11 +121,15 @@ nz-content {
 }
 
 .inner-content {
-  padding: 24px;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-  min-height: calc(100vh - 112px); // Account for header + content padding
+  padding: 12px;
+  background: transparent;
+  min-height: calc(100vh - 88px);
+}
+
+@media (min-width: 768px) {
+  .inner-content {
+    padding: 24px;
+  }
 }
 
 // Mobile responsive (drawer mode)

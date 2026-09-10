@@ -1,0 +1,134 @@
+// Mobile-first field chips and data tiles (no HTML tables)
+
+.field-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .field-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field__label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.2;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.field__value {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.88);
+  word-break: break-word;
+}
+
+.tile-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.data-tile {
+  display: block;
+  width: 100%;
+  padding: 14px 14px 14px 16px;
+  text-align: left;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  border-left: 4px solid #722ed1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.data-tile--static {
+  cursor: default;
+}
+
+.data-tile--combat {
+  border-left-color: #cf1322;
+}
+
+.data-tile--somatic {
+  border-left-color: #1677ff;
+}
+
+.data-tile--muted {
+  background: #fafafa;
+  border-left-color: #bfbfbf;
+}
+
+.data-tile--error {
+  background: #fff2e8;
+  border-left-color: #fa541c;
+}
+
+.data-tile__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.data-tile__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+  line-height: 1.35;
+}
+
+.data-tile__action {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: #722ed1;
+  font-weight: 500;
+}
+
+.data-tile__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.data-tile__meta {
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.45;
+}
+
+.ant-modal {
+  max-width: calc(100vw - 16px);
+}
+
+@media (max-width: 768px) {
+  .ant-modal {
+    top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .ant-modal-content {
+    border-radius: 10px;
+  }
+}

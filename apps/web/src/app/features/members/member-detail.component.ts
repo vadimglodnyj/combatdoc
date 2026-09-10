@@ -66,7 +66,7 @@ export class MemberDetailComponent implements OnInit {
       nzTitle: 'Редагувати картку',
       nzContent: MemberFormComponent,
       nzData: { member: this.member },
-      nzWidth: 800,
+      nzWidth: window.innerWidth < 768 ? '100%' : 720,
       nzFooter: null,
     });
 

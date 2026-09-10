@@ -15,18 +15,13 @@ export class MembersListComponent implements OnInit {
   members: ServiceMember[] = [];
   loading = false;
   searchValue = '';
-  isDesktop = window.innerWidth >= 768;
 
   constructor(
     private serviceMemberService: ServiceMemberService,
     private router: Router,
     private modal: NzModalService,
     private message: NzMessageService,
-  ) {
-    window.addEventListener('resize', () => {
-      this.isDesktop = window.innerWidth >= 768;
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadMembers();
@@ -59,7 +54,7 @@ export class MembersListComponent implements OnInit {
     const modal = this.modal.create({
       nzTitle: 'Додати військовослужбовця',
       nzContent: MemberFormComponent,
-      nzWidth: 800,
+      nzWidth: this.formModalWidth(),
       nzFooter: null,
     });
 
@@ -75,7 +70,7 @@ export class MembersListComponent implements OnInit {
       nzTitle: 'Редагувати картку',
       nzContent: MemberFormComponent,
       nzData: { member },
-      nzWidth: 800,
+      nzWidth: this.formModalWidth(),
       nzFooter: null,
     });
 
@@ -113,5 +108,9 @@ export class MembersListComponent implements OnInit {
 
   getNatureColor(nature: string): string {
     return nature === 'COMBAT' ? 'red' : 'blue';
+  }
+
+  private formModalWidth(): string | number {
+    return window.innerWidth < 768 ? '100%' : 720;
   }
 }

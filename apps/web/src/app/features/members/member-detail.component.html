@@ -41,49 +41,68 @@
 
     <nz-divider></nz-divider>
 
-    <nz-descriptions [nzColumn]="3" nzBordered>
-      <nz-descriptions-item nzTitle="Звання">
-        {{ member.rank?.name }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Підрозділ">
-        {{ member.unit?.name }}
-        <span *ngIf="member.unitShortName"> ({{ member.unitShortName }})</span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Вид служби">
-        {{ member.serviceType }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Посада" [nzSpan]="3">
-        {{ member.fullPosition }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата народження">
-        {{ formatDate(member.birthDate) }}
-        <span *ngIf="getAge()"> ({{ getAge() }} років)</span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Телефон">
-        <a *ngIf="member.phone" href="tel:{{ member.phone }}">{{ member.phone }}</a>
-        <span *ngIf="!member.phone">—</span>
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="ІПН">
-        {{ member.taxId || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Військкомат призову" [nzSpan]="2">
-        {{ member.recruitmentOffice || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Дата призову">
-        {{ formatDate(member.recruitmentDate) }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Освіта">
-        {{ member.educationLevel || '—' }}
-      </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Навчальний заклад" [nzSpan]="2">
-        <div *ngIf="member.educationInstitution">
-          {{ member.educationInstitution }}
-          <span *ngIf="member.educationPlace">, {{ member.educationPlace }}</span>
-          <span *ngIf="member.educationYear"> ({{ member.educationYear }})</span>
-        </div>
-        <span *ngIf="!member.educationInstitution">—</span>
-      </nz-descriptions-item>
-    </nz-descriptions>
+    <dl class="field-list">
+      <div class="field">
+        <dt class="field__label">Звання</dt>
+        <dd class="field__value">{{ member.rank?.name || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Підрозділ</dt>
+        <dd class="field__value">
+          {{ member.unit?.name || '—' }}
+          <span *ngIf="member.unitShortName"> ({{ member.unitShortName }})</span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Вид служби</dt>
+        <dd class="field__value">{{ member.serviceType || '—' }}</dd>
+      </div>
+      <div class="field field--wide">
+        <dt class="field__label">Посада</dt>
+        <dd class="field__value">{{ member.fullPosition || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата народження</dt>
+        <dd class="field__value">
+          {{ formatDate(member.birthDate) }}
+          <span *ngIf="getAge()"> ({{ getAge() }} років)</span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Телефон</dt>
+        <dd class="field__value">
+          <a *ngIf="member.phone" href="tel:{{ member.phone }}">{{ member.phone }}</a>
+          <span *ngIf="!member.phone">—</span>
+        </dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">ІПН</dt>
+        <dd class="field__value">{{ member.taxId || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Військкомат призову</dt>
+        <dd class="field__value">{{ member.recruitmentOffice || '—' }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Дата призову</dt>
+        <dd class="field__value">{{ formatDate(member.recruitmentDate) }}</dd>
+      </div>
+      <div class="field">
+        <dt class="field__label">Освіта</dt>
+        <dd class="field__value">{{ member.educationLevel || '—' }}</dd>
+      </div>
+      <div class="field field--wide">
+        <dt class="field__label">Навчальний заклад</dt>
+        <dd class="field__value">
+          <ng-container *ngIf="member.educationInstitution">
+            {{ member.educationInstitution }}
+            <span *ngIf="member.educationPlace">, {{ member.educationPlace }}</span>
+            <span *ngIf="member.educationYear"> ({{ member.educationYear }})</span>
+          </ng-container>
+          <span *ngIf="!member.educationInstitution">—</span>
+        </dd>
+      </div>
+    </dl>
   </nz-card>
 
   <nz-card class="tabs-card">
@@ -103,14 +122,20 @@
               nzNotFoundContent="Немає епізодів лікування"
             ></nz-empty>
 
-            <nz-list
-              *ngIf="episodes.length > 0"
-            [nzDataSource]="episodes"
-            [nzRenderItem]="episodeTemplate"
-          >
-            <ng-template #episodeTemplate let-episode>
-              <nz-list-item [nzActions]="[viewAction]">
-                <nz-card [nzTitle]="episode.diagnosis">
+            <div class="tile-stack" *ngIf="episodes.length > 0">
+              <article
+                class="data-tile"
+                *ngFor="let episode of episodes"
+                [class.data-tile--combat]="episode.nature === 'COMBAT'"
+                [class.data-tile--somatic]="episode.nature === 'SOMATIC'"
+                [class.data-tile--muted]="!episode.isActive"
+                (click)="viewEpisode(episode)"
+              >
+                <div class="data-tile__head">
+                  <h3 class="data-tile__title">{{ episode.diagnosis }}</h3>
+                  <span class="data-tile__action">Переглянути</span>
+                </div>
+                <div class="data-tile__tags">
                   <nz-tag [nzColor]="getNatureColor(episode.nature)">
                     {{ getNatureLabel(episode.nature) }}
                   </nz-tag>
@@ -123,19 +148,13 @@
                   >
                     Довідка №5: {{ getCertStatusLabel(episode.injuryCertificate.status) }}
                   </nz-tag>
-                  <p>
-                    <strong>Початок:</strong> {{ formatDate(episode.startDate) }}
-                  </p>
-                  <p *ngIf="episode.endDate">
-                    <strong>Завершення:</strong> {{ formatDate(episode.endDate) }}
-                  </p>
-                </nz-card>
-                <ng-template #viewAction>
-                  <a (click)="viewEpisode(episode)">Переглянути</a>
-                </ng-template>
-              </nz-list-item>
-            </ng-template>
-          </nz-list>
+                </div>
+                <p class="data-tile__meta">
+                  Початок: {{ formatDate(episode.startDate) }}
+                  <span *ngIf="episode.endDate"> · Завершення: {{ formatDate(episode.endDate) }}</span>
+                </p>
+              </article>
+            </div>
           </nz-spin>
         </div>
       </nz-tab>
