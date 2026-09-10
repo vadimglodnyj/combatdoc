@@ -224,20 +224,15 @@
               (click)="viewEpisode(item.episode!)"
             >
               <div class="data-tile__head">
-                <h3 class="data-tile__title">{{ careSegmentLabel(item.type) }}</h3>
+                <h3 class="data-tile__title">{{ careSegmentTitle(item.type, item.facility) }}</h3>
                 <span class="data-tile__action">Епізод</span>
               </div>
-              <div class="data-tile__tags">
-                <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
-                <nz-tag *ngIf="item.episode?.diagnosis && item.episode?.diagnosis !== item.diagnosis">
-                  {{ item.episode?.diagnosis }}
-                </nz-tag>
-              </div>
-              <p class="data-tile__meta">
+              <p class="data-tile__date">
                 {{ formatDate(item.dateFrom) }}
                 <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
-                <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
-                <span *ngIf="item.notes"> · {{ item.notes }}</span>
+              </p>
+              <p class="data-tile__diagnosis" *ngIf="item.diagnosis || item.episode?.diagnosis">
+                {{ item.diagnosis || item.episode?.diagnosis }}
               </p>
             </article>
           </div>

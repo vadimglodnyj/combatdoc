@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { formatUnitLabel } from '../../core/utils/format-unit';
 import {
-  careSegmentLabel,
+  careSegmentTitle,
   consultationDiagnosis,
   consultationKindLabel,
   consultationStatusColor,
@@ -212,7 +212,7 @@ export class MemberDetailComponent implements OnInit {
   consultationStatusLabel = consultationStatusLabel;
   consultationStatusColor = consultationStatusColor;
   consultationDiagnosis = consultationDiagnosis;
-  careSegmentLabel = careSegmentLabel;
+  careSegmentTitle = careSegmentTitle;
 
   private targetEpisode(): Episode | undefined {
     return this.episodes.find((item) => item.isActive) || this.episodes[0];

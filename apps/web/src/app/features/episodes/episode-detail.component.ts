@@ -12,7 +12,7 @@ import { ClinicalService } from '../../core/services/clinical.service';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { formatUnitLabel } from '../../core/utils/format-unit';
 import {
-  careSegmentLabel,
+  careSegmentTitle,
   consultationKindLabel,
   consultationStatusColor,
   consultationStatusLabel,
@@ -129,7 +129,7 @@ export class EpisodeDetailComponent implements OnInit {
   consultationKindLabel = consultationKindLabel;
   consultationStatusLabel = consultationStatusLabel;
   consultationStatusColor = consultationStatusColor;
-  careSegmentLabel = careSegmentLabel;
+  careSegmentTitle = careSegmentTitle;
 
   isReal(id?: string): boolean {
     return !!id && !id.startsWith('from-episode-');

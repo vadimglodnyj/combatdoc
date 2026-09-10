@@ -6,7 +6,7 @@ import { uk } from 'date-fns/locale';
 import { EpisodeService } from '../../core/services/episode.service';
 import { ClinicalService } from '../../core/services/clinical.service';
 import { CareSegment, Consultation, Episode } from '../../core/models/service-member.model';
-import { careSegmentLabel, consultationDiagnosis, consultationKindLabel } from '../../core/utils/clinical-labels';
+import { careSegmentTitle, consultationDiagnosis, consultationKindLabel } from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-control',
@@ -177,7 +177,7 @@ export class ControlComponent implements OnInit {
     return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  segmentLabel = careSegmentLabel;
+  segmentTitle = careSegmentTitle;
   kindLabel = consultationKindLabel;
   diagnosisOf = consultationDiagnosis;
 }

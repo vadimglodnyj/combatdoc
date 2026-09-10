@@ -9,13 +9,15 @@
           <div class="tile-stack" *ngIf="hospital.length > 0">
             <article class="data-tile" *ngFor="let item of hospital" (click)="viewEpisode(item.episodeId)">
               <div class="data-tile__head">
-                <h3 class="data-tile__title">{{ segmentLabel(item.type) }}</h3>
+                <h3 class="data-tile__title">{{ segmentTitle(item.type, item.facility) }}</h3>
                 <span class="data-tile__action">Епізод</span>
               </div>
-              <p class="data-tile__meta">
-                {{ memberName(item.episode?.serviceMember) }}
-                · з {{ formatDate(item.dateFrom) }}
-                · {{ item.facility?.shortName || item.facility?.name || '—' }}
+              <p class="data-tile__date">
+                {{ memberName(item.episode?.serviceMember) }} · {{ formatDate(item.dateFrom) }}
+                <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
+              </p>
+              <p class="data-tile__diagnosis" *ngIf="item.diagnosis || item.episode?.diagnosis">
+                {{ item.diagnosis || item.episode?.diagnosis }}
               </p>
             </article>
           </div>

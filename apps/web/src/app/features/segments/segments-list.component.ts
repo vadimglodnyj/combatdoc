@@ -5,7 +5,7 @@ import { ClinicalService } from '../../core/services/clinical.service';
 import { CareSegment } from '../../core/models/service-member.model';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
-import { careSegmentLabel, CARE_SEGMENT_TYPES } from '../../core/utils/clinical-labels';
+import { careSegmentTitle, CARE_SEGMENT_TYPES } from '../../core/utils/clinical-labels';
 
 @Component({
   selector: 'app-segments-list',
@@ -85,6 +85,6 @@ export class SegmentsListComponent implements OnInit {
     return `${member.lastName} ${member.firstName} ${member.middleName}`.trim();
   }
 
-  typeLabel = careSegmentLabel;
+  segmentTitle = careSegmentTitle;
   types = CARE_SEGMENT_TYPES;
 }

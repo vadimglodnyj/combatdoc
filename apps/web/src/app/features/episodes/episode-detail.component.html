@@ -246,20 +246,17 @@
     </ng-template>
     <nz-empty *ngIf="segments.length === 0" nzNotFoundContent="Немає сегментів"></nz-empty>
     <div class="tile-stack" *ngIf="segments.length > 0">
-      <article class="data-tile" *ngFor="let item of segments">
+      <article class="data-tile data-tile--static" *ngFor="let item of segments">
         <div class="data-tile__head">
-          <h3 class="data-tile__title">{{ careSegmentLabel(item.type) }}</h3>
-        </div>
-        <div class="data-tile__tags">
-          <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
+          <h3 class="data-tile__title">{{ careSegmentTitle(item.type, item.facility) }}</h3>
           <nz-tag *ngIf="!item.dateTo" nzColor="green">Відкритий</nz-tag>
         </div>
-        <p class="data-tile__meta">
+        <p class="data-tile__date">
           {{ formatDate(item.dateFrom) }}
           <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
-          <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
-          <span *ngIf="item.notes"> · {{ item.notes }}</span>
         </p>
+        <p class="data-tile__diagnosis" *ngIf="item.diagnosis">{{ item.diagnosis }}</p>
+        <p class="data-tile__notes" *ngIf="item.notes && item.notes !== item.diagnosis">{{ item.notes }}</p>
         <div class="tile-actions" *ngIf="isReal(item.id)" (click)="$event.stopPropagation()">
           <button nz-button nzSize="small" (click)="openSegmentForm('edit', item)">Редагувати</button>
           <button *ngIf="!item.dateTo" nz-button nzSize="small" (click)="closeSegment(item)">Закрити</button>

@@ -34,18 +34,15 @@
     <div class="tile-stack" *ngIf="items.length > 0">
       <article class="data-tile" *ngFor="let item of items" (click)="open(item)">
         <div class="data-tile__head">
-          <h3 class="data-tile__title">{{ typeLabel(item.type) }}</h3>
+          <h3 class="data-tile__title">{{ segmentTitle(item.type, item.facility) }}</h3>
           <span class="data-tile__action">Епізод</span>
         </div>
-        <div class="data-tile__tags">
-          <nz-tag>{{ item.facility?.shortName || item.facility?.name || 'ЛПЗ не вказано' }}</nz-tag>
-          <nz-tag *ngIf="!item.dateTo" nzColor="green">Відкритий</nz-tag>
-          <nz-tag *ngIf="item.episode?.diagnosis">{{ item.episode?.diagnosis }}</nz-tag>
-        </div>
-        <p class="data-tile__meta">
+        <p class="data-tile__date">
           {{ memberName(item) }} · {{ formatDate(item.dateFrom) }}
           <span *ngIf="item.dateTo"> — {{ formatDate(item.dateTo) }}</span>
-          <span *ngIf="item.diagnosis"> · {{ item.diagnosis }}</span>
+        </p>
+        <p class="data-tile__diagnosis" *ngIf="item.diagnosis || item.episode?.diagnosis">
+          {{ item.diagnosis || item.episode?.diagnosis }}
         </p>
       </article>
     </div>

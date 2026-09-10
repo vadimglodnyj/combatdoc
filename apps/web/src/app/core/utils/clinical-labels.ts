@@ -1,5 +1,5 @@
 export const CARE_SEGMENT_TYPES: Array<{ value: string; label: string }> = [
-  { value: 'HOSP', label: 'Стаціонар' },
+  { value: 'HOSP', label: 'Стаціонарне' },
   { value: 'DAY', label: 'Денний стаціонар' },
   { value: 'AMB', label: 'Поліклініка' },
   { value: 'MPBR', label: 'МПБр' },
@@ -10,7 +10,7 @@ export const CARE_SEGMENT_TYPES: Array<{ value: string; label: string }> = [
 ];
 
 export const CARE_SEGMENT_LABELS: Record<string, string> = {
-  HOSP: 'Стаціонар',
+  HOSP: 'Стаціонарне',
   DAY: 'Денний стаціонар',
   AMB: 'Поліклініка',
   MPBR: 'МПБр',
@@ -34,6 +34,22 @@ export const CONSULTATION_STATUS_LABELS: Record<string, string> = {
 export function careSegmentLabel(type?: string | null): string {
   if (!type) return '—';
   return CARE_SEGMENT_LABELS[type] || type;
+}
+
+export function facilityLabel(facility?: { name?: string | null; shortName?: string | null } | null): string {
+  const name = (facility?.name || '').trim();
+  const shortName = (facility?.shortName || '').trim();
+  if (name && shortName && name !== shortName) {
+    return `${shortName} — ${name}`;
+  }
+  return name || shortName || 'ЛПЗ не вказано';
+}
+
+export function careSegmentTitle(
+  type?: string | null,
+  facility?: { name?: string | null; shortName?: string | null } | null,
+): string {
+  return `${careSegmentLabel(type)} — ${facilityLabel(facility)}`;
 }
 
 export function consultationKindLabel(kind?: string | null): string {
