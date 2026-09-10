@@ -4,10 +4,11 @@
   "description": "CombatDOC API (NestJS)",
   "scripts": {
     "build": "nest build",
-    "predev": "node ../../scripts/free-port.cjs",
+    "predev": "node ../../scripts/free-port.cjs && prisma generate",
     "dev": "nest start --watch --preserveWatchOutput",
     "start": "node dist/main",
     "start:prod": "node dist/main",
+    "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
