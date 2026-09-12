@@ -1,0 +1,111 @@
+---
+description: Mobile-first, adaptive UI concept and rules for the CombatDOC Angular + NG-ZORRO web app. Apply when creating or editing any screen, component, template or style in apps/web.
+globs: apps/web/**/*.{ts,html,scss,less}
+alwaysApply: false
+---
+
+# CombatDOC UI Concept — Mobile-First Adaptive
+
+The unit medic frequently works from a phone in the field. Every screen MUST
+be built mobile-first and stay fully usable on a ~360–414px viewport. Desktop
+is a progressive enhancement, never the baseline.
+
+Full rationale and the visual system live in `docs/DESIGN.md`. This file is the
+enforceable checklist — follow it whenever you touch `apps/web`.
+
+## 1. Mobile-first, always
+
+- Write base CSS for the phone. Add complexity upward with `min-width` media
+  queries only. Do NOT write desktop styles first and patch them down with
+  `max-width`.
+- Standard breakpoints (aligned with the Ant / NG-ZORRO grid). Primary switch
+  is `md` = 768px:
+  - `xs` < 576, `sm` ≥ 576, `md` ≥ 768, `lg` ≥ 992, `xl` ≥ 1200.
+- Never introduce horizontal page scroll on mobile. Content reflows vertically.
+
+## 2. No data tables — ever
+
+- Do NOT use `nz-table`, `<table>`, or fixed multi-column grids for data
+  collections. They break on phones and are banned in this project.
+- Render every collection as a vertical stack of card tiles using the shared
+  classes in `apps/web/src/styles/_data.scss`:
+  - Wrapper: `.tile-stack`
+  - Item: `.data-tile` (+ modifiers: `--combat`, `--somatic`, `--muted`,
+    `--error`, `--static`)
+  - Parts: `.data-tile__head`, `__title`, `__action`, `__tags`, `__meta`,
+    `__date`, `__diagnosis`, `__notes`
+- Key/value detail data uses `.field-list` + `.field` chips (1 column on
+  mobile, 2 at ≥640px, 3 at ≥1200px). Full-width values use `.field--wide`.
+- On wide screens tiles MAY flow into a responsive multi-column grid, but the
+  single-column mobile stack is the source of truth.
+
+## 3. One canonical page scaffold for list screens
+
+Use the shared `.page-list` scaffold from `_data.scss` for every list/index
+screen. Do NOT invent per-feature container/header classes (e.g. the legacy
+`.members-list-container` / `.page-header` pattern is deprecated):
+
+- `.page-list` — root
+- `.page-list__header` — title row + primary action (e.g. "Додати")
+- `.page-list__filters` — search / date / status filters (wraps, full-width
+  search on mobile)
+- `.page-list__meta` — result count / hints
+- `.page-list__pager` — centered `nz-pagination`
+
+`apps/web/src/app/features/members/members-list.component.*` is the reference
+implementation — mirror it for new list screens.
+
+## 4. Touch ergonomics
+
+- Interactive targets ≥ 44×44px on mobile. Avoid `nzSize="small"` for primary
+  touch actions on phones.
+- Phone numbers use `tel:` links; keep `(click)="$event.stopPropagation()"` on
+  inline actions inside a clickable tile.
+- Filters and header actions must `flex-wrap` and go full-width on mobile;
+  never rely on a single non-wrapping row.
+- Prefer a sticky/reachable primary action on long mobile screens.
+
+## 5. Consult the NG-ZORRO demos before building a component
+
+Before creating or substantially changing any NG-ZORRO-based component, check
+the official demo for that component to use the exact, current Angular API and
+markup (imports, module, selectors, inputs/outputs):
+
+- Component gallery: https://ng.ant.design/components/overview/en
+- Direct pattern, e.g. `https://ng.ant.design/components/modal/en`,
+  `.../upload/en`, `.../form/en`, `.../list/en`, `.../tag/en`,
+  `.../date-picker/en` — each demo page ships copy-pasteable Angular code.
+- Match the version in `apps/web` (NG-ZORRO 17). Prefer the demo's imports and
+  template shape over guessing an API from memory, and adapt it to the
+  mobile-first conventions in this file.
+- Note: `nz-table` demos exist on the site, but data collections in this
+  project still use the card-tile pattern from section 2 — do not add tables.
+
+## 6. Navigation
+
+- Sidebar (`nz-sider`) collapses to a drawer/trigger under `md` (768px) — this
+  is already wired in `core/layout`. Keep new nav entries working in the
+  collapsed state (icon + label).
+
+## 7. Forms & modals
+
+- One column on mobile; multi-column only at ≥ `md` via the NG-ZORRO grid
+  (`nz-row` / `nz-col` with responsive spans, not fixed widths).
+- Modals are full-width on mobile: pass `nzWidth: '100%'` (or the existing
+  `formModalWidth()` helper) below 768px; `.ant-modal` is already capped to
+  `calc(100vw - 16px)` in `_data.scss`.
+
+## 8. Theme constraints (do not regress)
+
+- Keep the Ant Design Pro look defined in `theme.less` / `styles.scss`:
+  Golden Purple primary `#722ED1`, Inter font, `uk_UA` locale, dates via
+  `date-fns` (Ukrainian). Status colors: COMBAT = red, SOMATIC = blue,
+  active = green, closed = gray.
+
+## Definition of done (UI changes)
+
+Before considering a UI change complete, confirm at a 360–414px width:
+- no horizontal scroll,
+- no table/grid squashing,
+- all actions tappable and reachable,
+- the screen uses `.page-list` + `.tile-stack` / `.field-list` conventions.

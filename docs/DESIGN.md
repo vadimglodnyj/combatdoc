@@ -1,5 +1,49 @@
 # CombatDOC Design System
 
+## Design Concept: Mobile-First Adaptive (chosen)
+
+**Decision:** CombatDOC is built **mobile-first**. The unit medic often works
+from a phone in the field, so every screen must be fully usable at ~360–414px
+width, and desktop is treated as a progressive enhancement — never the
+baseline.
+
+This is the single agreed design direction for the app. The enforceable,
+day-to-day checklist lives in `.cursor/rules/mobile-first-ui.mdc` (auto-applied
+when editing `apps/web`). This section explains *why*; that rule explains *how*.
+
+### Principles
+
+1. **Mobile-first CSS.** Base styles target the phone; complexity is added
+   upward with `min-width` breakpoints only. No desktop-first + `max-width`
+   patching.
+2. **No data tables.** `nz-table` / HTML `<table>` / fixed multi-column grids
+   are banned for collections — they break on phones. Collections render as a
+   vertical stack of **card tiles** (`.tile-stack` + `.data-tile`), and
+   key/value detail uses **field chips** (`.field-list` + `.field`). Both live
+   in `apps/web/src/styles/_data.scss` and already reflow 1 → 2 → 3 columns.
+3. **One canonical page scaffold.** Every list screen uses the shared
+   `.page-list` classes (`__header`, `__filters`, `__meta`, `__pager`) instead
+   of per-feature layout classes. `members-list` is the reference implementation.
+4. **Touch ergonomics.** ≥44px targets, `tel:` links, wrapping/full-width
+   filters, reachable primary actions.
+5. **Adaptive navigation.** Sidebar collapses to a drawer under 768px
+   (already wired in `core/layout`).
+6. **Breakpoints** (aligned with the NG-ZORRO grid): `xs`<576, `sm`≥576,
+   `md`≥768 (primary switch), `lg`≥992, `xl`≥1200.
+7. **Reference the NG-ZORRO demos first.** Before building or changing any
+   component, open its official demo at [ng.ant.design](https://ng.ant.design/components/overview/en)
+   (e.g. `modal`, `upload`, `form`, `list`, `tag`, `date-picker`) and use the
+   exact, versioned Angular code (imports, module, template) — then adapt it to
+   these mobile-first conventions. Match NG-ZORRO 17 as used in `apps/web`.
+
+### Why not classic dense tables?
+
+The old Medhar workflow leaned on wide desktop tables. On a phone those force
+horizontal scroll and tiny tap targets. Card tiles keep the same information
+(title + status tags + meta) in a thumb-friendly, vertically-scrolling stack,
+while still supporting a multi-column tile grid on large screens — so desktop
+density is preserved without a table.
+
 ## UI Theme Lock (Ant Design Pro)
 
 ### Layout Configuration
