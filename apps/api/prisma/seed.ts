@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { BOP2_UNITS } from './unit-dictionary';
 
 const prisma = new PrismaClient();
 
@@ -61,6 +62,22 @@ async function main() {
       where: { code: unit.code },
       update: {},
       create: unit,
+    });
+  }
+
+  // Canonical 2-й БОП subunits (from the штат) so imports reuse proper
+  // names/short codes instead of creating ad-hoc units.
+  let bopSort = 10;
+  for (const unit of BOP2_UNITS) {
+    await prisma.unit.upsert({
+      where: { code: unit.code },
+      update: { name: unit.name, shortName: unit.short },
+      create: {
+        code: unit.code,
+        name: unit.name,
+        shortName: unit.short,
+        sortOrder: bopSort++,
+      },
     });
   }
 

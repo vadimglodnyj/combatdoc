@@ -11,6 +11,7 @@ import {
 } from './turso-units';
 import { looksLikeConsultation, mapCare, segmentDedupeKey } from './turso-care';
 import { collapseDuplicateCareSegments } from './dedupe-care-segments';
+import { resolveUnitShort } from './unit-dictionary';
 
 const prisma = new PrismaClient();
 
@@ -217,10 +218,20 @@ async function main() {
   }
 
   function labelFromPatient(row: SqlRow): string {
+    const unitName = cell(row, 'unit', 'unit_name', 'pidrozdil', 'subdivision');
+    const unitShort = cell(row, 'unit_short');
+    const rankUnit = cell(row, 'rank_unit');
+    const position = cell(row, 'position', 'posada');
+
+    // Prefer the canonical 2-й БОП dictionary (recognises real subunits like
+    // ВЗ / РВП / NРОП even when the value is a full position string).
+    const canonical = resolveUnitShort(unitShort, unitName, rankUnit, position);
+    if (canonical) return canonical;
+
     return extractUnitLabel({
-      unitName: cell(row, 'unit', 'unit_name', 'pidrozdil', 'subdivision'),
-      unitShort: cell(row, 'unit_short'),
-      rankUnit: cell(row, 'rank_unit'),
+      unitName,
+      unitShort,
+      rankUnit,
       rank: cell(row, 'rank'),
     });
   }
