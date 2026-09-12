@@ -71,11 +71,11 @@ async function main() {
   for (const unit of BOP2_UNITS) {
     await prisma.unit.upsert({
       where: { code: unit.code },
-      update: { name: unit.name, shortName: unit.short },
+      update: { name: unit.name, shortName: unit.signature },
       create: {
         code: unit.code,
         name: unit.name,
-        shortName: unit.short,
+        shortName: unit.signature,
         sortOrder: bopSort++,
       },
     });

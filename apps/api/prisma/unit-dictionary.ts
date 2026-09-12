@@ -5,13 +5,27 @@
  */
 import { normalizeKey } from './turso-units';
 
+/** The single battalion this part operates (в/ч 3029 has only the 2nd БОП). */
+export const BATTALION_LABEL = '2 БОП';
+
+/**
+ * Signature shown on cards and in chat dispatch lines. Includes the battalion
+ * so a subunit is unambiguous within 2 БОП, e.g. "2 БОП, 1РОП" / "2 БОП, ВЗ".
+ */
+export function unitSignature(short: string): string {
+  const s = (short || '').trim();
+  if (!s) return BATTALION_LABEL;
+  return `${BATTALION_LABEL}, ${s}`;
+}
+
 export interface CanonicalUnit {
   code: string; // stable unique code for the units table
-  short: string; // short label shown in the UI ("Підрозділ (скорочено)")
+  short: string; // bare code ("Підрозділ (скорочено)"), e.g. "1РОП"
+  signature: string; // display подпис, e.g. "2 БОП, 1РОП"
   name: string; // full official name ("Підрозділ 3")
 }
 
-export const BOP2_UNITS: CanonicalUnit[] = [
+const RAW_UNITS: Array<Omit<CanonicalUnit, 'signature'>> = [
   { code: '2BOP_1ROP', short: '1РОП', name: '1-ша рота оперативного призначення (на бронетранспортерах)' },
   { code: '2BOP_2ROP', short: '2РОП', name: '2-га рота оперативного призначення (на бронетранспортерах)' },
   { code: '2BOP_3ROP', short: '3РОП', name: '3-тя рота оперативного призначення (на бронетранспортерах)' },
@@ -28,6 +42,11 @@ export const BOP2_UNITS: CanonicalUnit[] = [
   { code: '2BOP_SHB', short: 'ШБ', name: 'Штаб' },
   { code: '2BOP_UB', short: 'УБ', name: 'Управління батальйону' },
 ];
+
+export const BOP2_UNITS: CanonicalUnit[] = RAW_UNITS.map((u) => ({
+  ...u,
+  signature: unitSignature(u.short),
+}));
 
 const BY_SHORT = new Map(BOP2_UNITS.map((u) => [normalizeKey(u.short), u]));
 
@@ -80,5 +99,13 @@ export function resolveUnitShort(...parts: string[]): string | null {
 
 export function resolveUnit(...parts: string[]): CanonicalUnit | null {
   const short = resolveUnitShort(...parts);
-  return short ? unitByShort(short) ?? { code: `IMP_${short}`, short, name: short } : null;
+  if (!short) return null;
+  return (
+    unitByShort(short) ?? {
+      code: `IMP_${short}`,
+      short,
+      signature: unitSignature(short),
+      name: short,
+    }
+  );
 }

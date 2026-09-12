@@ -1,5 +1,10 @@
 import assert from 'assert';
-import { BOP2_UNITS, resolveUnit, resolveUnitShort } from './unit-dictionary';
+import {
+  BOP2_UNITS,
+  resolveUnit,
+  resolveUnitShort,
+  unitSignature,
+} from './unit-dictionary';
 
 // Full official names (Підрозділ 3) resolve to their canonical short code.
 const nameCases: Array<[string, string]> = [
@@ -63,10 +68,17 @@ assert.equal(resolveUnitShort('У розпорядженні командира 
 assert.equal(resolveUnitShort('1 механізована рота'), null);
 assert.equal(resolveUnitShort(''), null);
 
-// resolveUnit returns the full official name for a matched code.
+// resolveUnit returns the full official name + подпис for a matched code.
 const vz = resolveUnit("взвод зв'язку 2-го батальйону оперативного призначення");
 assert.equal(vz?.short, 'ВЗ');
 assert.equal(vz?.name, "Взвод зв'язку");
+assert.equal(vz?.signature, '2 БОП, ВЗ');
+
+// Signature (подпис) always includes the battalion so subunits are unambiguous.
+assert.equal(unitSignature('1РОП'), '2 БОП, 1РОП');
+assert.equal(unitSignature('ВЗ'), '2 БОП, ВЗ');
+assert.equal(resolveUnit('Стрілець 1-ої роти оперативного призначення')?.signature, '2 БОП, 1РОП');
+assert.equal(BOP2_UNITS.every((u) => u.signature.startsWith('2 БОП, ')), true);
 
 assert.equal(BOP2_UNITS.length, 15);
 
