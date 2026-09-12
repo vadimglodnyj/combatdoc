@@ -1,25 +1,26 @@
-<div class="members-list-container">
-  <div class="page-header">
+<div class="page-list">
+  <div class="page-list__header">
     <h1>Військовослужбовці</h1>
-    <div class="header-actions">
-      <nz-input-group [nzPrefix]="prefixIconSearch" class="search-input">
-        <input
-          type="text"
-          nz-input
-          placeholder="Пошук за ПІБ або телефоном"
-          [(ngModel)]="searchValue"
-          (keyup.enter)="onSearch()"
-        />
-      </nz-input-group>
-      <button nz-button nzType="primary" (click)="onSearch()">
-        <span nz-icon nzType="search"></span>
-        Пошук
-      </button>
-      <button nz-button nzType="primary" (click)="openCreateModal()">
-        <span nz-icon nzType="plus"></span>
-        Додати
-      </button>
-    </div>
+    <button nz-button nzType="primary" (click)="openCreateModal()">
+      <span nz-icon nzType="plus"></span>
+      Додати
+    </button>
+  </div>
+
+  <div class="page-list__filters">
+    <nz-input-group [nzPrefix]="prefixIconSearch" class="page-list__search">
+      <input
+        type="text"
+        nz-input
+        placeholder="Пошук за ПІБ або телефоном"
+        [(ngModel)]="searchValue"
+        (keyup.enter)="onSearch()"
+      />
+    </nz-input-group>
+    <button nz-button nzType="primary" (click)="onSearch()">
+      <span nz-icon nzType="search"></span>
+      Пошук
+    </button>
   </div>
 
   <ng-template #prefixIconSearch>
@@ -29,7 +30,7 @@
   <nz-spin [nzSpinning]="loading">
     <nz-empty *ngIf="!loading && members.length === 0" nzNotFoundContent="Немає карток"></nz-empty>
 
-    <p class="list-meta" *ngIf="!loading && total > 0">{{ total }} карток</p>
+    <p class="page-list__meta" *ngIf="!loading && total > 0">{{ total }} карток</p>
 
     <div class="tile-stack" *ngIf="members.length > 0">
       <article class="data-tile" *ngFor="let member of members" (click)="viewDetail(member)">
@@ -87,7 +88,7 @@
       </article>
     </div>
 
-    <div class="list-pager" *ngIf="total > 20">
+    <div class="page-list__pager" *ngIf="total > 20">
       <nz-pagination
         [nzPageIndex]="page"
         [nzPageSize]="pageSize"
